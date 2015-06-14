@@ -14,21 +14,29 @@ CommandStack = new Class({
    * @constructor
    * @param {string} stackName
    * @param {function} callback Fire when command subscribe is ready.
+   * @param {boolean} if this set true the commands will skip at the first time. This is useful when you using own serialize code.
    */
-  initialize: function(stackName, callback) {
+  initialize: function(stackName, callback, isSkip) {
     var self = this;
     this.stackName = stackName;
     this.clear();
 
     Meteor.subscribe('command', stackName, function(){
       self.commandCursor = CommandCollection.find({stackName: stackName}, {sort: {createdAt: 1}});
+      self.totalCount = self.commandCursor.count();
       self.observer = self.commandCursor.observe({
         added: function(doc){
+          if(isSkip && self.loadedCount < self.totalCount){
+            self.loadedCount++;
+            return;
+          }
+
           if(!doc.isRemoved){
             self.execCommand(doc, true);
           }
 
           self.checkUndoRedo(stackName);
+
         },
         changed: function(doc){
           self.execCommand(doc, !doc.isRemoved);
@@ -66,6 +74,8 @@ CommandStack = new Class({
     if(this.observer){
       this.observer.stop();
     }
+    this.loadedCount = 0;
+    this.totalCount = 0;
     this.observer = null;
   },
 
