@@ -22,7 +22,7 @@ CommandStack = new Class({
 
     Meteor.subscribe('command', stackName, function(){
       self.commandCursor = CommandCollection.find({stackName: stackName}, {sort: {createdAt: 1}});
-      self.commandCursor.observe({
+      self.observer = self.commandCursor.observe({
         added: function(doc){
           if(!doc.isRemoved){
             self.execCommand(doc, true);
@@ -63,6 +63,10 @@ CommandStack = new Class({
     this._stack = {};
     this.canUndo = new ReactiveVar(false);
     this.canRedo = new ReactiveVar(false);
+    if(this.observer){
+      this.observer.stop();
+    }
+    this.observer = null;
   },
 
   /**
