@@ -48,9 +48,10 @@
     CommandFactory.add("CustomCommand", CustomCommand);
 
 ## Make stack
+    var isSkip = false;
     var stack = new CommandStack('myStack', function(){
       isReady = true;
-    });
+    }, isSkip);
 
 ## Execute command
     var myCommand = new CustomCommand(stack, Meteor.userId(), {
