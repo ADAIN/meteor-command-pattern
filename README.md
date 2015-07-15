@@ -1,2 +1,3 @@
 # meteor-command-pattern
-Implement command pattern using meteor collection
+- This is sample Meteor project for package 'adain:meteor-command-pattern'.
+- You need to install meteor to run this project.

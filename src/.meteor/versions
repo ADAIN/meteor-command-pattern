@@ -3,7 +3,7 @@ accounts-password@1.1.1
 accounts-ui@1.1.5
 accounts-ui-unstyled@1.1.7
 adain:classjs@1.0.3
-adain:meteor-command-pattern@0.0.1
+adain:meteor-command-pattern@1.0.0
 adain:meteor-guid@1.0.1
 autoupdate@1.2.1
 base64@1.0.3

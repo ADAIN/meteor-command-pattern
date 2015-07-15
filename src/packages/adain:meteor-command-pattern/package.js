@@ -6,8 +6,8 @@
 Package.describe({
   name: 'adain:meteor-command-pattern',
   summary: 'Implement command pattern using meteor collection',
-  version: '0.0.1',
-  git: 'https://github.com/ADAIN/meteor-command-pattern'
+  version: '1.0.0',
+  git: 'https://github.com/ADAIN/meteor-command-pattern/tree/master/src/packages/adain:meteor-command-pattern'
 });
 
 Package.onUse(function (api) {
@@ -18,8 +18,8 @@ Package.onUse(function (api) {
   api.use([
     'minimongo',
     'mongo',
-    'adain:classjs',
-    'adain:meteor-guid',
+    'adain:classjs@1.0.3',
+    'adain:meteor-guid@1.0.1',
     'accounts-base'
   ], ['client', 'server']);
 
