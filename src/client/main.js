@@ -22,10 +22,10 @@ Template.main.onDestroyed(function () {
 Template.main.helpers({});
 
 Template.main.events({
-  'click .add': function(){
+  'click .add': function(e, t){
 
     var myCommand = new AddDivCommand(stack, Meteor.userId(), {
-      text: 'hi/' + Meteor.userId() + "/" + Math.floor(Math.random() * 1000)
+      text: t.$('#userInput').val()
     });
     myCommand.execute();
   },
