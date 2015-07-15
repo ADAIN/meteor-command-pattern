@@ -24,7 +24,7 @@
        * @override
        */
       do: function(){
-        // you access property using this.property
+        // you can access property using this.property
         // every command has this.guid
         doSomething();
       },
