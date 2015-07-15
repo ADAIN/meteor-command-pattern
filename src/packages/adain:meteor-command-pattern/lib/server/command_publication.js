@@ -7,7 +7,3 @@
 Meteor.publish('command', function (stackName) {
   return CommandCollection.find({stackName: stackName}, {sort: {createdAt: 1}});
 });
-
-Meteor.publish('commandStack', function(stackName){
-  return CommandCollection.find({stackName: stackName});
-});
