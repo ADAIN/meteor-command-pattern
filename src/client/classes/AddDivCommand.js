@@ -16,13 +16,11 @@ AddDivCommand = Command.extend({
   type: "AddDivCommand",
 
   /**
-   * execute
+   * do
    * @method
    * @override
-   * @param isPush
    */
-  execute: function(isPush){
-    this.parent(isPush);
+  do: function(){
     $("body").append("<div id='" + this.guid + "'>" + this.property.text + "</div>");
   },
 

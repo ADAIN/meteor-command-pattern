@@ -6,3 +6,5 @@
 
 meteor-platform
 adain:meteor-command-pattern
+accounts-ui
+accounts-password

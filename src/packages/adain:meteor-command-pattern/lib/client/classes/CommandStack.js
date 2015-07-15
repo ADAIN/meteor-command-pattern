@@ -13,28 +13,30 @@ CommandStack = new Class({
    * initialize
    * @constructor
    * @param {string} stackName
+   * @param {function} callback Fire when command subscribe is ready.
    */
-  initialize: function(stackName) {
+  initialize: function(stackName, callback) {
     var self = this;
     this.stackName = stackName;
     this.clear();
 
     Meteor.subscribe('command', stackName, function(){
-      var command;
       self.commandCursor = CommandCollection.find({stackName: stackName}, {sort: {createdAt: 1}});
       self.commandCursor.observe({
         added: function(doc){
-          var index = self._stack.indexOf(_.findWhere(self._stack, {guid: doc.guid}));
-          if(index === -1){
-            command = new window[doc.type](self, doc._userId, doc.property, doc.guid);
-            command.execute(false);
-            self.push(command, false);
+          if(!doc.isRemoved){
+            self.execCommand(doc, true);
           }
         },
+        changed: function(doc){
+          self.execCommand(doc, !doc.isRemoved);
+        },
         removed: function(doc){
-
+          self._stack[doc.guid] = undefined;
         }
       });
+
+      callback(true);
     });
   },
 
@@ -43,75 +45,72 @@ CommandStack = new Class({
    * @method
    */
   clear: function() {
-    this._stack = [];
-    this.length = this.pointer = 0;
+    this._stack = {};
+  },
+
+  /**
+   * execute command
+   * @param commandData
+   * @param isDo
+   */
+  execCommand: function(commandData, isDo){
+    var command;
+    var self = this;
+    if(!self._stack[commandData.guid]){
+      command = new window[commandData.type](self, commandData._userId, commandData.property, commandData.guid);
+      self.push(command, false);
+    }else{
+      command = self._stack[commandData.guid];
+    }
+
+    if(isDo){
+      command.do();
+    }else{
+      command.undo();
+    }
   },
 
   /**
    * push command
    * @method
    * @param {Command} command
-   * @param {boolean} [isApplyCollection]
+   * @param {boolean} isAddToCollection
    */
-  push: function(command, isApplyCollection) {
+  push: function(command, isAddToCollection) {
+    if(isAddToCollection){
+      var commandData = command.getData();
+      commandData.isRemoved = false;
+      commandData.createdAt = new Date();
 
-    if(isApplyCollection === undefined){
-      for(var i = this.pointer;i < this.length;i++){
-        CommandCollection.remove({_id: this._stack[i]._id});
-      }
+      var removedCommands = CommandCollection.find({stackName: this.stackName, _userId: Meteor.userId(), isRemoved: true}, {fields: {_id: 1}}).fetch();
+      _.each(removedCommands, function(data){
+        CommandCollection.remove(data._id);
+      });
+
+      CommandCollection.insert(commandData);
+
+      this._stack[command.guid] = command;
     }
-
-    this._stack.splice(this.pointer, this.length);
-    this._stack.push(command);
-    this.length = this.pointer = this._stack.length;
-
-    // apply database collection
-    if(isApplyCollection === undefined){
-      command._id = CommandCollection.insert(command.getData());
-    }
-  },
-
-  /**
-   * step to
-   * @method
-   * @param position
-   */
-  stepTo: function(position) {
-    if (position < 0 || position > this.length) return;
-    var i, n;
-
-    switch (true) {
-      case position > this.pointer :
-        for (i = this.pointer, n = position; i < n; i++)
-          this._stack[i].execute(false);
-        break;
-
-      case position < this.pointer :
-        if (this._redo && this._redo.execute) {
-          this._redo.execute();
-          for (i = 0, n = position; i < n; i++)
-            this._stack[i].execute(false);
-        } else {
-          for (i = 0, n = this.pointer - position; i < n; i++)
-            this._stack[this.pointer - i - 1].undo();
-        }
-        break;
-    }
-    this.pointer = position;
   },
 
   /**
    * undo
    */
-  undo: function() {
-    this.stepTo(this.pointer - 1);
+  undo: function(){
+    var commandData = CommandCollection.findOne({stackName: this.stackName, _userId: Meteor.userId(), isRemoved: false}, {sort: {createdAt: -1}});
+    if(commandData){
+      CommandCollection.update({_id: commandData._id}, {$set: {isRemoved: true}});
+    }
   },
 
   /**
    * redo
    */
-  redo: function() {
-    this.stepTo(this.pointer + 1);
+  redo: function(){
+    var commandData = CommandCollection.findOne({stackName: this.stackName, _userId: Meteor.userId(), isRemoved: true}, {sort: {createdAt: 1}});
+    if(commandData){
+      CommandCollection.update({_id: commandData._id}, {$set: {isRemoved: false}});
+    }
   }
 
 });

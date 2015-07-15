@@ -19,11 +19,11 @@ Package.onUse(function (api) {
     'minimongo',
     'mongo',
     'adain:classjs',
-    'adain:meteor-guid'
+    'adain:meteor-guid',
+    'accounts-base'
   ], ['client', 'server']);
 
   api.addFiles('lib/collections/CommandCollection.js', ['client', 'server']);
-  api.addFiles('lib/collections/CommandStackCursorCollection.js', ['client', 'server']);
 
   api.addFiles('lib/client/classes/Command.js', 'client');
   api.addFiles('lib/client/classes/CommandStack.js', 'client');
@@ -31,7 +31,6 @@ Package.onUse(function (api) {
   api.addFiles('lib/server/command_publication.js', 'server');
 
   api.export('CommandCollection', ['client', 'server']);
-  api.export('CommandStackCursorCollection', ['client', 'server']);
 
   api.export('Command', 'client');
   api.export('CommandStack', 'client');

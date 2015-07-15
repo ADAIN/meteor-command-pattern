@@ -4,10 +4,13 @@
  * description : main
  */
 
-var stack;
+var stack = null;
+var isReady = false;
 
 Template.main.onCreated(function () {
-  stack = new CommandStack('inc');
+  stack = new CommandStack('inc', function(){
+    isReady = true;
+  });
 });
 
 Template.main.onRendered(function () {
@@ -21,8 +24,8 @@ Template.main.helpers({});
 Template.main.events({
   'click .add': function(){
 
-    var myCommand = new AddDivCommand(stack, null, {
-      text: 'hi'
+    var myCommand = new AddDivCommand(stack, Meteor.userId(), {
+      text: 'hi/' + Meteor.userId() + "/" + Math.floor(Math.random() * 1000)
     });
     myCommand.execute();
   },

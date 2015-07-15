@@ -9,4 +9,20 @@ CommandCollection = new Mongo.Collection('Command');
 if(Meteor.isServer){
   CommandCollection._ensureIndex('stackName');
   CommandCollection._ensureIndex('_userId');
+  CommandCollection._ensureIndex('guid');
 }
+
+CommandCollection.allow({
+  insert: function (userId, doc) {
+    // the user must be logged in, and the document must be owned by the user
+    return (userId && doc._userId === userId);
+  },
+  update: function (userId, doc, fields, modifier) {
+    // can only change your own documents
+    return doc._userId === userId;
+  },
+  remove: function (userId, doc) {
+    return doc._userId === userId;
+  },
+  fetch: ['_userId']
+});

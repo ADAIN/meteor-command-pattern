@@ -52,13 +52,18 @@ Command = new Class({
 
   /**
    * execute command
+   */
+  execute: function(){
+    this.stack.push(this, true);
+  },
+
+  /**
+   * do command
    * @method
    * @param {boolean} [isPush]
    */
-  execute: function(isPush){
-    if(isPush === undefined){
-      this.stack.push(this);
-    }
+  do: function(){
+
   },
 
   /**
