@@ -2,7 +2,7 @@
 - Implement command pattern using meteor collection with user account system.
 - Every commands need user id to execute.
 - Undo & Redo is working with user account.
-- try sample project [https://github.com/ADAIN/meteor-command-pattern]
+- try sample project [http://meteor-command.meteor.com] [https://github.com/ADAIN/meteor-command-pattern]
 
 # Usage
 
