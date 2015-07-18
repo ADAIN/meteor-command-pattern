@@ -7,6 +7,11 @@
   {{> loginButtons}}
   <input type="text" id="userInput" />
   <button class="add">ADD</button>
+  {{#if canUndo}}
   <button class="undo">UNDO</button>
+  {{/if}}
+
+  {{#if canRedo}}
   <button class="redo">REDO</button>
+  {{/if}}
 </template>

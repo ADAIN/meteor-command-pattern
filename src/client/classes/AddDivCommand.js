@@ -33,3 +33,8 @@ AddDivCommand = Command.extend({
     $("#" + this.guid).remove();
   }
 });
+
+/**
+ * add to command factory
+ */
+CommandFactory.add('AddDivCommand', AddDivCommand);

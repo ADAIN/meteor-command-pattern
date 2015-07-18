@@ -27,12 +27,16 @@ CommandStack = new Class({
           if(!doc.isRemoved){
             self.execCommand(doc, true);
           }
+
+          self.checkUndoRedo(stackName);
         },
         changed: function(doc){
           self.execCommand(doc, !doc.isRemoved);
+          self.checkUndoRedo(stackName);
         },
         removed: function(doc){
           self._stack[doc.guid] = undefined;
+          self.checkUndoRedo(stackName);
         }
       });
 
@@ -41,11 +45,22 @@ CommandStack = new Class({
   },
 
   /**
+   * check user can undo or redo
+   * @param stackName
+   */
+  checkUndoRedo: function(stackName){
+    this.canUndo.set(CommandCollection.find({stackName: stackName, _userId: Meteor.userId(), isRemoved: false}).count() > 0);
+    this.canRedo.set(CommandCollection.find({stackName: stackName, _userId: Meteor.userId(), isRemoved: true}).count() > 0);
+  },
+
+  /**
    * clear
    * @method
    */
   clear: function() {
     this._stack = {};
+    this.canUndo = new ReactiveVar(false);
+    this.canRedo = new ReactiveVar(false);
   },
 
   /**
@@ -57,7 +72,17 @@ CommandStack = new Class({
     var command;
     var self = this;
     if(!self._stack[commandData.guid]){
-      command = new window[commandData.type](self, commandData._userId, commandData.property, commandData.guid);
+
+      if(CommandFactory.commandList[commandData.type]){
+        command = new CommandFactory.commandList[commandData.type](self, commandData._userId, commandData.property, commandData.guid);
+      }else if(window[commandData.type]){
+        command = new window[commandData.type](self, commandData._userId, commandData.property, commandData.guid);
+      }
+
+      if(!command){
+        console.error(commandData.type + ' is not found.\nAdd your command to CommandFactory using CommandFactory.add("' + commandData.type + '", ' + commandData + ');');
+      }
+
       self.push(command, false);
     }else{
       command = self._stack[commandData.guid];

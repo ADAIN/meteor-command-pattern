@@ -6,7 +6,7 @@
 Package.describe({
   name: 'adain:meteor-command-pattern',
   summary: 'Implement command pattern using meteor collection',
-  version: '1.0.1',
+  version: '1.0.2',
   git: 'https://github.com/ADAIN/meteor-command-pattern/tree/master/src/packages/adain:meteor-command-pattern'
 });
 
@@ -20,12 +20,14 @@ Package.onUse(function (api) {
     'mongo',
     'adain:classjs@1.0.3',
     'adain:meteor-guid@1.0.1',
-    'accounts-base'
+    'accounts-base',
+    'reactive-var'
   ], ['client', 'server']);
 
   api.addFiles('lib/collections/CommandCollection.js', ['client', 'server']);
 
   api.addFiles('lib/client/classes/Command.js', 'client');
+  api.addFiles('lib/client/classes/CommandFactory.js', 'client');
   api.addFiles('lib/client/classes/CommandStack.js', 'client');
 
   api.addFiles('lib/server/command_publication.js', 'server');
@@ -33,6 +35,7 @@ Package.onUse(function (api) {
   api.export('CommandCollection', ['client', 'server']);
 
   api.export('Command', 'client');
+  api.export('CommandFactory', 'client');
   api.export('CommandStack', 'client');
 
 });

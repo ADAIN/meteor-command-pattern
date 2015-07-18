@@ -39,6 +39,9 @@
       }
     });
 
+    // add to command factory
+    CommandFactory.add("CustomCommand", CustomCommand);
+
 ## Make stack
     var stack = new CommandStack('myStack', function(){
       isReady = true;

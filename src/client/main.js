@@ -19,11 +19,22 @@ Template.main.onRendered(function () {
 Template.main.onDestroyed(function () {
 });
 
-Template.main.helpers({});
+Template.main.helpers({
+  canUndo: function(){
+    return stack.canUndo.get();
+  },
+
+  canRedo: function(){
+    return stack.canRedo.get();
+  }
+});
 
 Template.main.events({
   'click .add': function(e, t){
-
+    if(!Meteor.userId()){
+      alert('You have to login first.');
+      return;
+    }
     var myCommand = new AddDivCommand(stack, Meteor.userId(), {
       text: t.$('#userInput').val()
     });
