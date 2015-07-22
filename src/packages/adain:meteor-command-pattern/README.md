@@ -11,7 +11,8 @@
      * add div command
      * @class
      */
-    CustomCommand = Command.extend({
+    CustomCommand = new Class(Command); 
+    CustomCommand.extend({
     
       /**
        * class type

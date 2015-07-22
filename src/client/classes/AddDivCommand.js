@@ -8,7 +8,8 @@
  * add div command
  * @class
  */
-AddDivCommand = Command.extend({
+AddDivCommand = new Class(Command);
+AddDivCommand.extend({
 
   /**
    * class type
