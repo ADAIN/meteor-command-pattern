@@ -40,7 +40,7 @@ CommandStack = new Class({
         }
       });
 
-      callback(true);
+      callback(self);
     });
   },
 
