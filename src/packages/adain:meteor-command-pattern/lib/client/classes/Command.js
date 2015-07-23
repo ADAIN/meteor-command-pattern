@@ -54,6 +54,11 @@ Command = new Class({
    * execute command
    */
   execute: function(){
+    if(this.stack === undefined){
+      console.error("Stack is undefined. You have to set the stack.");
+      return;
+    }
+
     this.stack.push(this, true);
   },
 
