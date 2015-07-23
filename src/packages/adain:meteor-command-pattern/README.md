@@ -24,13 +24,13 @@
       type: "CustomCommand",
     
       /**
-       * do
+       * exec
        * @method
        * @override
        */
-      do: function(){
+      exec: function(){
         // you can access property using this.property
-        // every command has this.guid
+        // every command has this.guid for identify
         doSomething();
       },
     

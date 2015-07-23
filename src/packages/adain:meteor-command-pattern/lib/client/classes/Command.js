@@ -58,11 +58,11 @@ Command = new Class({
   },
 
   /**
-   * do command
+   * exec command
    * @method
    * @param {boolean} [isPush]
    */
-  do: function(){
+  exec: function(){
 
   },
 

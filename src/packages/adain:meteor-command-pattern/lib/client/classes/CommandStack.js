@@ -91,7 +91,7 @@ CommandStack = new Class({
     }
 
     if(isDo){
-      command.do();
+      command.exec();
     }else{
       command.undo();
     }

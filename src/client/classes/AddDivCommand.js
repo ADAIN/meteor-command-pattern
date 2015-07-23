@@ -17,11 +17,11 @@ AddDivCommand.extend({
   type: "AddDivCommand",
 
   /**
-   * do
+   * exec
    * @method
    * @override
    */
-  do: function(){
+  exec: function(){
     $("body").append("<div id='" + this.guid + "'>" + this.property.text + "</div>");
   },
 
