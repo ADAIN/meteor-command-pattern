@@ -6,6 +6,10 @@
 
 # Usage
 
+## Add packages
+    meteor add adain:meteor-command-pattern
+    meteor add adain:classjs
+
 ## Make custom command        
     /**
      * add div command
