@@ -7,7 +7,7 @@
 /**
  * @class CommandStack command stack
  */
-CommandStack = new Class({
+CommandStack = class CommandStack{
 
   /**
    * initialize
@@ -16,8 +16,8 @@ CommandStack = new Class({
    * @param {function} callback Fire when command subscribe is ready.
    * @param {boolean} if this set true the commands will skip at the first time. This is useful when you using own serialize code.
    */
-  initialize: function(stackName, callback, isSkip) {
-    var self = this;
+  constructor(stackName, callback, isSkip) {
+    const self = this;
     this.stackName = stackName;
     this.clear();
 
@@ -52,22 +52,22 @@ CommandStack = new Class({
         callback(self);
       }
     });
-  },
+  }
 
   /**
    * check user can undo or redo
    * @param stackName
    */
-  checkUndoRedo: function(stackName){
+  checkUndoRedo(stackName){
     this.canUndo.set(CommandCollection.find({stackName: stackName, _userId: Meteor.userId(), isRemoved: false}).count() > 0);
     this.canRedo.set(CommandCollection.find({stackName: stackName, _userId: Meteor.userId(), isRemoved: true}).count() > 0);
-  },
+  }
 
   /**
    * clear
    * @method
    */
-  clear: function() {
+  clear() {
     this._stack = {};
     this.canUndo = new ReactiveVar(false);
     this.canRedo = new ReactiveVar(false);
@@ -77,16 +77,16 @@ CommandStack = new Class({
     this.loadedCount = 0;
     this.totalCount = 0;
     this.observer = null;
-  },
+  }
 
   /**
    * execute command
    * @param commandData
    * @param isDo
    */
-  execCommand: function(commandData, isDo){
-    var command;
-    var self = this;
+  execCommand(commandData, isDo){
+    let command;
+    const self = this;
     if(!self._stack[commandData.guid]){
 
       if(CommandFactory.commandList[commandData.type]){
@@ -109,7 +109,7 @@ CommandStack = new Class({
     }else{
       command.undo();
     }
-  },
+  }
 
   /**
    * push command
@@ -117,9 +117,9 @@ CommandStack = new Class({
    * @param {Command} command
    * @param {boolean} isAddToCollection
    */
-  push: function(command, isAddToCollection) {
+  push(command, isAddToCollection) {
     if(isAddToCollection){
-      var commandData = command.getData();
+      let commandData = command.getData();
       commandData.isRemoved = false;
       commandData.createdAt = new Date();
 
@@ -132,26 +132,26 @@ CommandStack = new Class({
 
       this._stack[command.guid] = command;
     }
-  },
+  }
 
   /**
    * undo
    */
-  undo: function(){
-    var commandData = CommandCollection.findOne({stackName: this.stackName, _userId: Meteor.userId(), isRemoved: false}, {sort: {createdAt: -1}});
+  undo(){
+    let commandData = CommandCollection.findOne({stackName: this.stackName, _userId: Meteor.userId(), isRemoved: false}, {sort: {createdAt: -1}});
     if(commandData){
       CommandCollection.update({_id: commandData._id}, {$set: {isRemoved: true}});
     }
-  },
+  }
 
   /**
    * redo
    */
-  redo: function(){
+  redo(){
     var commandData = CommandCollection.findOne({stackName: this.stackName, _userId: Meteor.userId(), isRemoved: true}, {sort: {createdAt: 1}});
     if(commandData){
       CommandCollection.update({_id: commandData._id}, {$set: {isRemoved: false}});
     }
   }
 
-});
+};

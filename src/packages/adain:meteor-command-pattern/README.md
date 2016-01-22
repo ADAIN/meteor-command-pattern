@@ -3,32 +3,25 @@
 - Every commands need user id to execute.
 - Undo & Redo is working with user account.
 - try sample project [http://meteor-command.meteor.com] [https://github.com/ADAIN/meteor-command-pattern]
+- use ecmascript
 
 # Usage
 
 ## Add packages
     meteor add adain:meteor-command-pattern
-    meteor add adain:classjs
 
 ## Make custom command        
     /**
      * add div command
      * @class
      */
-    CustomCommand = new Class(Command); 
-    CustomCommand.extend({
-    
-      /**
-       * class type
-       */
-      type: "CustomCommand",
-    
+    CustomCommand = class CustomCommand extends Command{
       /**
        * exec
        * @method
        * @override
        */
-      exec: function(){
+      exec(){
         // you can access property using this.property
         // every command has this.guid for identify
         doSomething();
@@ -39,7 +32,7 @@
        * @override
        * @method
        */
-      undo: function(){
+      undo(){
         undoSomething();
       }
     });

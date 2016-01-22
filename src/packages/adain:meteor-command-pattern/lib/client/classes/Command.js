@@ -8,24 +8,19 @@
  * @class Command Command
  * @constructor
  */
-Command = new Class({
+Command = class Command {
 
   /**
-   * type
-   */
-  type: 'Command',
-
-  /**
-   * initialize command
-   *
-   * @method
+   * init command
    * @param {CommandStack} stack
    * @param {string} type
    * @param {string} [_userId]
    * @param {object} [property]
    * @param {string} [guid]
    */
-  initialize: function(stack, _userId, property, guid){
+  constructor(stack, _userId, property, guid){
+    this.type = this.constructor.name;
+
     if(!guid) {
       this.guid = Guid.raw();
     }else{
@@ -34,13 +29,13 @@ Command = new Class({
     this.stack = stack;
     this._userId = _userId;
     this.property = property;
-  },
+  }
 
   /**
    * get command data
    * @returns {{guid: *, stackName: *, type: *, _userId: *, property: *}}
    */
-  getData: function(){
+  getData(){
     return {
       guid: this.guid,
       stackName: this.stack.stackName,
@@ -48,34 +43,33 @@ Command = new Class({
       _userId: this._userId,
       property: this.property
     };
-  },
+  }
 
   /**
    * execute command
    */
-  execute: function(){
+  execute(){
     if(this.stack === undefined){
       console.error("Stack is undefined. You have to set the stack.");
       return;
     }
 
     this.stack.push(this, true);
-  },
+  }
 
   /**
    * exec command
    * @method
-   * @param {boolean} [isPush]
    */
-  exec: function(){
+  exec(){
 
-  },
+  }
 
   /**
    * undo command
    * @method
    */
-  undo: function(){
+  undo(){
 
   }
-});
+};

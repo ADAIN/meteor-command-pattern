@@ -8,32 +8,26 @@
  * add div command
  * @class
  */
-AddDivCommand = new Class(Command);
-AddDivCommand.extend({
-
-  /**
-   * class type
-   */
-  type: "AddDivCommand",
+AddDivCommand = class AddDivCommand extends Command{
 
   /**
    * exec
    * @method
    * @override
    */
-  exec: function(){
+  exec(){
     $("body").append("<div id='" + this.guid + "'>" + this.property.text + "</div>");
-  },
+  }
 
   /**
    * undo
    * @override
    * @method
    */
-  undo: function(){
+  undo(){
     $("#" + this.guid).remove();
   }
-});
+};
 
 /**
  * add to command factory

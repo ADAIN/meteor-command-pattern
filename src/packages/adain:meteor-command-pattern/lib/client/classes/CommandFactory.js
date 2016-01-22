@@ -12,7 +12,7 @@ CommandFactory = {
    * @param commandName
    * @param commandClass
    */
-  add: function(commandName, commandClass){
+  add(commandName, commandClass){
     this.commandList[commandName] = commandClass;
   }
 
