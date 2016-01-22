@@ -14,11 +14,14 @@ CommandStack = class CommandStack{
    * @constructor
    * @param {string} stackName
    * @param {function} callback Fire when command subscribe is ready.
-   * @param {boolean} if this set true the commands will skip at the first time. This is useful when you using own serialize code.
+   * @param {boolean} isSkip If this set true the commands will skip at the first time. This is useful when you using own serialize code.
+   * @param {boolean} isGlobal If this set true global undo redo activate, false is user account base undo, redo
    */
-  constructor(stackName, callback, isSkip) {
+  constructor(stackName, callback, isSkip, isGlobal) {
     const self = this;
     this.stackName = stackName;
+    this.isGlobal = !!isGlobal;
+    isSkip = !!isSkip;
     this.clear();
 
     Meteor.subscribe('command', stackName, function(){
@@ -59,8 +62,13 @@ CommandStack = class CommandStack{
    * @param stackName
    */
   checkUndoRedo(stackName){
-    this.canUndo.set(CommandCollection.find({stackName: stackName, _userId: Meteor.userId(), isRemoved: false}).count() > 0);
-    this.canRedo.set(CommandCollection.find({stackName: stackName, _userId: Meteor.userId(), isRemoved: true}).count() > 0);
+    if(this.isGlobal){
+      this.canUndo.set(CommandCollection.find({stackName: stackName, isRemoved: false}).count() > 0);
+      this.canRedo.set(CommandCollection.find({stackName: stackName, isRemoved: true}).count() > 0);
+    }else{
+      this.canUndo.set(CommandCollection.find({stackName: stackName, _userId: Meteor.userId(), isRemoved: false}).count() > 0);
+      this.canRedo.set(CommandCollection.find({stackName: stackName, _userId: Meteor.userId(), isRemoved: true}).count() > 0);
+    }
   }
 
   /**
@@ -123,7 +131,12 @@ CommandStack = class CommandStack{
       commandData.isRemoved = false;
       commandData.createdAt = new Date();
 
-      var removedCommands = CommandCollection.find({stackName: this.stackName, _userId: Meteor.userId(), isRemoved: true}, {fields: {_id: 1}}).fetch();
+      let query = {stackName: this.stackName, isRemoved: true};
+      if(!this.isGlobal){
+        query._userId = Meteor.userId();
+      }
+
+      let removedCommands = CommandCollection.find(query, {fields: {_id: 1}}).fetch();
       _.each(removedCommands, function(data){
         CommandCollection.remove(data._id);
       });
@@ -138,7 +151,12 @@ CommandStack = class CommandStack{
    * undo
    */
   undo(){
-    let commandData = CommandCollection.findOne({stackName: this.stackName, _userId: Meteor.userId(), isRemoved: false}, {sort: {createdAt: -1}});
+    let query = {stackName: this.stackName, isRemoved: false};
+    if(!this.isGlobal){
+      query._userId = Meteor.userId();
+    }
+
+    let commandData = CommandCollection.findOne(query, {sort: {createdAt: -1}});
     if(commandData){
       CommandCollection.update({_id: commandData._id}, {$set: {isRemoved: true}});
     }
@@ -148,7 +166,12 @@ CommandStack = class CommandStack{
    * redo
    */
   redo(){
-    var commandData = CommandCollection.findOne({stackName: this.stackName, _userId: Meteor.userId(), isRemoved: true}, {sort: {createdAt: 1}});
+    let query = {stackName: this.stackName, isRemoved: true};
+    if(!this.isGlobal){
+      query._userId = Meteor.userId();
+    }
+
+    let commandData = CommandCollection.findOne(query, {sort: {createdAt: 1}});
     if(commandData){
       CommandCollection.update({_id: commandData._id}, {$set: {isRemoved: false}});
     }

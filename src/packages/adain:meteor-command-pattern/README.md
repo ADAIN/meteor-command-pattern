@@ -41,10 +41,13 @@
     CommandFactory.add("CustomCommand", CustomCommand);
 
 ## Make stack
+    // if this set true the commands will skip at the first time. This is useful when you using own serialize code.
     var isSkip = false;
+    // if this set true global undo redo activate, false is user account base undo, redo
+    var isGlobal = true;
     var stack = new CommandStack('myStack', function(){
       isReady = true;
-    }, isSkip);
+    }, isSkip, isGlobal);
 
 ## Execute command
     var myCommand = new CustomCommand(stack, Meteor.userId(), {
