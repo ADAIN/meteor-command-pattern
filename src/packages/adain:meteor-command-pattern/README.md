@@ -8,65 +8,76 @@
 # Usage
 
 ## Add packages
-    meteor add adain:meteor-command-pattern
+```bash
+$ meteor add adain:meteor-command-pattern
+```
+## Make custom command
+```javascript
+/**
+ * add div command
+ * @class
+ */
+CustomCommand = class CustomCommand extends Command{
+  /**
+   * exec
+   * @method
+   * @override
+   */
+  exec(){
+    // you can access property using this.property
+    // every command has this.guid for identify
+    doSomething();
+  },
 
-## Make custom command        
-    /**
-     * add div command
-     * @class
-     */
-    CustomCommand = class CustomCommand extends Command{
-      /**
-       * exec
-       * @method
-       * @override
-       */
-      exec(){
-        // you can access property using this.property
-        // every command has this.guid for identify
-        doSomething();
-      },
-    
-      /**
-       * undo
-       * @override
-       * @method
-       */
-      undo(){
-        undoSomething();
-      }
-    });
+  /**
+   * undo
+   * @override
+   * @method
+   */
+  undo(){
+    undoSomething();
+  }
+});
 
-    // add to command factory
-    CommandFactory.add("CustomCommand", CustomCommand);
-
+// add to command factory
+CommandFactory.add("CustomCommand", CustomCommand);
+```
 ## Make stack
-    // if this set true the commands will skip at the first time. This is useful when you using own serialize code.
-    var isSkip = false;
-    // if this set true global undo redo activate, false is user account base undo, redo
-    var isGlobal = true;
-    var stack = new CommandStack('myStack', function(){
-      isReady = true;
-    }, isSkip, isGlobal);
-
+```javascript
+// if this set true the commands will skip at the first time. This is useful when you using own serialize code.
+var isSkip = false;
+// if this set true global undo redo activate, false is user account base undo, redo
+var isGlobal = true;
+var stack = new CommandStack('myStack', function(){
+  isReady = true;
+}, isSkip, isGlobal);
+```
 ## Execute command
-    var myCommand = new CustomCommand(stack, Meteor.userId(), {
-      myData: data
-    });
-    myCommand.execute();
-
+```javascript
+var myCommand = new CustomCommand(stack, Meteor.userId(), {
+  myData: data
+});
+myCommand.execute();
+```
 ## Undo & Redo
-    stack.undo();
-    stack.redo();
-
+```javascript
+stack.undo();
+stack.redo();
+```
 ## canUndo, canRedo
-    Template.main.helpers({
-      canUndo: function(){
-        return stack.canUndo.get();
-      },
-    
-      canRedo: function(){
-        return stack.canRedo.get();
-      }
-    });
-    
+```javascript
+Template.main.helpers({
+  canUndo: function(){
+    return stack.canUndo.get();
+  },
+
+  canRedo: function(){
+    return stack.canRedo.get();
+  }
+});
+```
+## Clear stack
+stop subscription and observe
+```javascript
+stack.clear();
+```

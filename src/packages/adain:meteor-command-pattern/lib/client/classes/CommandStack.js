@@ -24,7 +24,7 @@ CommandStack = class CommandStack{
     isSkip = !!isSkip;
     this.clear();
 
-    Meteor.subscribe('command', stackName, function(){
+    this.subscription = Meteor.subscribe('command', stackName, function(){
       self.commandCursor = CommandCollection.find({stackName: stackName}, {sort: {createdAt: 1}});
       self.totalCount = self.commandCursor.count();
       self.observer = self.commandCursor.observe({
@@ -82,9 +82,13 @@ CommandStack = class CommandStack{
     if(this.observer){
       this.observer.stop();
     }
+    if(this.subscription){
+      this.subscription.stop();
+    }
     this.loadedCount = 0;
     this.totalCount = 0;
     this.observer = null;
+    this.subscription = null;
   }
 
   /**
