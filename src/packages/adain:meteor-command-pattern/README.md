@@ -58,4 +58,15 @@
 ## Undo & Redo
     stack.undo();
     stack.redo();
+
+## canUndo, canRedo
+    Template.main.helpers({
+      canUndo: function(){
+        return stack.canUndo.get();
+      },
+    
+      canRedo: function(){
+        return stack.canRedo.get();
+      }
+    });
     
