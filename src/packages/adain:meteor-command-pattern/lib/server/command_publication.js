@@ -5,5 +5,10 @@
  */
 
 Meteor.publish('command', function (stackName) {
-  return CommandCollection.find({stackName: stackName}, {sort: {createdAt: 1}});
+  check(stackName, String);
+  if(this.userId){
+    return CommandCollection.find({stackName: stackName}, {sort: {createdAt: 1}});
+  }else{
+    this.ready();
+  }
 });
