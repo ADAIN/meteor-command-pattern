@@ -52,7 +52,6 @@ if(Meteor.isServer){
       check(query, Object);
 
       if(this.userId){
-        console.log(query);
         return CommandCollection.remove(query);
       }
     }
