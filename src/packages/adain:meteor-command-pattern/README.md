@@ -27,7 +27,7 @@ CustomCommand = class CustomCommand extends Command{
     // you can access property using this.property
     // every command has this.guid for identify
     doSomething();
-  },
+  }
 
   /**
    * undo
@@ -37,7 +37,7 @@ CustomCommand = class CustomCommand extends Command{
   undo(){
     undoSomething();
   }
-});
+};
 
 // add to command factory
 CommandFactory.add("CustomCommand", CustomCommand);
