@@ -81,3 +81,9 @@ stop subscription and observe
 ```javascript
 stack.clear();
 ```
+
+## Remove stack
+remove all commands in stack
+```javascript
+stack.remove();
+```

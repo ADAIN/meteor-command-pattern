@@ -26,3 +26,35 @@ CommandCollection.allow({
   },
   fetch: ['_userId']
 });
+
+if(Meteor.isServer){
+  Meteor.methods({
+    'CommandCollection.methods.insert': function(data){
+      check(data, Object);
+
+      if(this.userId){
+        return CommandCollection.insert(data);
+      }
+
+      return null;
+    },
+
+    'CommandCollection.methods.update': function(query, data){
+      check(query, Object);
+      check(data, Object);
+
+      if(this.userId){
+        return CommandCollection.update(query, data);
+      }
+    },
+
+    'CommandCollection.methods.remove': function(query){
+      check(query, Object);
+
+      if(this.userId){
+        console.log(query);
+        return CommandCollection.remove(query);
+      }
+    }
+  });
+}

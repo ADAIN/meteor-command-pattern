@@ -10,7 +10,7 @@ var isReady = false;
 Template.main.onCreated(function () {
   stack = new CommandStack('inc', function(){
     isReady = true;
-  });
+  }, false, true);
 });
 
 Template.main.onRendered(function () {
@@ -47,5 +47,9 @@ Template.main.events({
 
   'click .redo': function(){
     stack.redo();
+  },
+
+  'click .removeStackData': function(){
+    stack.remove();
   }
 });

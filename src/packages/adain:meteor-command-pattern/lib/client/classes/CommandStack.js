@@ -59,15 +59,14 @@ CommandStack = class CommandStack{
 
   /**
    * check user can undo or redo
-   * @param stackName
    */
-  checkUndoRedo(stackName){
+  checkUndoRedo(){
     if(this.isGlobal){
-      this.canUndo.set(CommandCollection.find({stackName: stackName, isRemoved: false}).count() > 0);
-      this.canRedo.set(CommandCollection.find({stackName: stackName, isRemoved: true}).count() > 0);
+      this.canUndo.set(CommandCollection.find({stackName: this.stackName, isRemoved: false}).count() > 0);
+      this.canRedo.set(CommandCollection.find({stackName: this.stackName, isRemoved: true}).count() > 0);
     }else{
-      this.canUndo.set(CommandCollection.find({stackName: stackName, _userId: Meteor.userId(), isRemoved: false}).count() > 0);
-      this.canRedo.set(CommandCollection.find({stackName: stackName, _userId: Meteor.userId(), isRemoved: true}).count() > 0);
+      this.canUndo.set(CommandCollection.find({stackName: this.stackName, _userId: Meteor.userId(), isRemoved: false}).count() > 0);
+      this.canRedo.set(CommandCollection.find({stackName: this.stackName, _userId: Meteor.userId(), isRemoved: true}).count() > 0);
     }
   }
 
@@ -89,6 +88,17 @@ CommandStack = class CommandStack{
     this.totalCount = 0;
     this.observer = null;
     this.subscription = null;
+  }
+
+  /**
+   * remove command from database
+   */
+  remove() {
+    Meteor.call('CommandCollection.methods.remove', {stackName: this.stackName}, function(err){
+      if(err){
+        console.error(err);
+      }
+    });
   }
 
   /**
@@ -140,10 +150,18 @@ CommandStack = class CommandStack{
         query._userId = Meteor.userId();
       }
 
-      let removedCommands = CommandCollection.find(query, {fields: {_id: 1}}).fetch();
-      _.each(removedCommands, function(data){
-        CommandCollection.remove(data._id);
-      });
+      if(this.isGlobal){
+        Meteor.call('CommandCollection.methods.remove', query, function(err){
+          if(err){
+            console.error(err);
+          }
+        });
+      }else{
+        let removedCommands = CommandCollection.find(query, {fields: {_id: 1}}).fetch();
+        _.each(removedCommands, function(data){
+          CommandCollection.remove(data._id);
+        });
+      }
 
       CommandCollection.insert(commandData);
 
@@ -163,7 +181,15 @@ CommandStack = class CommandStack{
 
     let commandData = CommandCollection.findOne(query, {sort: {createdAt: -1}});
     if(commandData){
-      CommandCollection.update({_id: commandData._id}, {$set: {isRemoved: true}});
+      if(this.isGlobal && commandData._userId !== Meteor.userId()){
+        Meteor.call('CommandCollection.methods.update', {_id: commandData._id}, {$set: {isRemoved: true}}, function(err){
+          if(err){
+            console.error(err);
+          }
+        });
+      }else{
+        CommandCollection.update({_id: commandData._id}, {$set: {isRemoved: true}});
+      }
     }
 
     return commandData;
@@ -181,7 +207,15 @@ CommandStack = class CommandStack{
 
     let commandData = CommandCollection.findOne(query, {sort: {createdAt: 1}});
     if(commandData){
-      CommandCollection.update({_id: commandData._id}, {$set: {isRemoved: false}});
+      if(this.isGlobal && commandData._userId !== Meteor.userId()){
+        Meteor.call('CommandCollection.methods.update', {_id: commandData._id}, {$set: {isRemoved: false}}, function(err){
+          if(err){
+            console.error(err);
+          }
+        });
+      }else{
+        CommandCollection.update({_id: commandData._id}, {$set: {isRemoved: false}});
+      }
     }
 
     return commandData;
