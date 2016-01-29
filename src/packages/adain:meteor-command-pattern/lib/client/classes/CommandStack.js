@@ -153,6 +153,7 @@ CommandStack = class CommandStack{
 
   /**
    * undo
+   * @returns {Command}
    */
   undo(){
     let query = {stackName: this.stackName, isRemoved: false};
@@ -164,10 +165,13 @@ CommandStack = class CommandStack{
     if(commandData){
       CommandCollection.update({_id: commandData._id}, {$set: {isRemoved: true}});
     }
+
+    return commandData;
   }
 
   /**
    * redo
+   * @returns {Command}
    */
   redo(){
     let query = {stackName: this.stackName, isRemoved: true};
@@ -179,6 +183,8 @@ CommandStack = class CommandStack{
     if(commandData){
       CommandCollection.update({_id: commandData._id}, {$set: {isRemoved: false}});
     }
+
+    return commandData;
   }
 
 };
