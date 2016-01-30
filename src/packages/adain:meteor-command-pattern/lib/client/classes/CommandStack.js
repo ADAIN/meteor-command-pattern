@@ -107,7 +107,6 @@ CommandStack = class CommandStack{
    * @param isDo
    */
   execCommand(commandData, isDo){
-    console.log(commandData, isDo);
     let command;
     const self = this;
     if(!self._stack[commandData.guid]){
