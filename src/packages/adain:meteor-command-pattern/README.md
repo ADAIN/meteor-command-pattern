@@ -24,7 +24,7 @@ CustomCommand = class CustomCommand extends Command{
    * @override
    */
   exec(){
-    // you can access property using this.property
+    // you can access property using this.property or this.oldProperty
     // every command has this.guid for identify
     doSomething();
   }

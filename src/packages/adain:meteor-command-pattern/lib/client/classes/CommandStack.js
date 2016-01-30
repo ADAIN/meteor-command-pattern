@@ -107,21 +107,20 @@ CommandStack = class CommandStack{
    * @param isDo
    */
   execCommand(commandData, isDo){
+    console.log(commandData, isDo);
     let command;
     const self = this;
     if(!self._stack[commandData.guid]){
 
       if(CommandFactory.commandList[commandData.type]){
-        command = new CommandFactory.commandList[commandData.type](self, commandData._userId, commandData.property, commandData.guid);
+        command = new CommandFactory.commandList[commandData.type](self, commandData._userId, commandData.property, commandData.oldProperty, commandData.guid);
       }else if(window[commandData.type]){
-        command = new window[commandData.type](self, commandData._userId, commandData.property, commandData.guid);
+        command = new window[commandData.type](self, commandData._userId, commandData.property, commandData.oldProperty, commandData.guid);
       }
 
       if(!command){
         console.error(commandData.type + ' is not found.\nAdd your command to CommandFactory using CommandFactory.add("' + commandData.type + '", ' + commandData + ');');
       }
-
-      self.push(command, false);
     }else{
       command = self._stack[commandData.guid];
     }
@@ -137,36 +136,33 @@ CommandStack = class CommandStack{
    * push command
    * @method
    * @param {Command} command
-   * @param {boolean} isAddToCollection
    */
-  push(command, isAddToCollection) {
-    if(isAddToCollection){
-      let commandData = command.getData();
-      commandData.isRemoved = false;
-      commandData.createdAt = new Date();
+  push(command) {
+    let commandData = command.getData();
+    commandData.isRemoved = false;
+    commandData.createdAt = new Date();
 
-      let query = {stackName: this.stackName, isRemoved: true};
-      if(!this.isGlobal){
-        query._userId = Meteor.userId();
-      }
-
-      if(this.isGlobal){
-        Meteor.call('CommandCollection.methods.remove', query, function(err){
-          if(err){
-            console.error(err);
-          }
-        });
-      }else{
-        let removedCommands = CommandCollection.find(query, {fields: {_id: 1}}).fetch();
-        _.each(removedCommands, function(data){
-          CommandCollection.remove(data._id);
-        });
-      }
-
-      CommandCollection.insert(commandData);
-
-      this._stack[command.guid] = command;
+    let query = {stackName: this.stackName, isRemoved: true};
+    if(!this.isGlobal){
+      query._userId = Meteor.userId();
     }
+
+    if(this.isGlobal){
+      Meteor.call('CommandCollection.methods.remove', query, function(err){
+        if(err){
+          console.error(err);
+        }
+      });
+    }else{
+      let removedCommands = CommandCollection.find(query, {fields: {_id: 1}}).fetch();
+      _.each(removedCommands, function(data){
+        CommandCollection.remove(data._id);
+      });
+    }
+
+    this._stack[command.guid] = command;
+
+    CommandCollection.insert(commandData);
   }
 
   /**

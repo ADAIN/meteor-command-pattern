@@ -13,12 +13,12 @@ Command = class Command {
   /**
    * init command
    * @param {CommandStack} stack
-   * @param {string} type
    * @param {string} [_userId]
    * @param {object} [property]
+   * @param {string} [oldProperty]
    * @param {string} [guid]
    */
-  constructor(stack, _userId, property, guid){
+  constructor(stack, _userId, property, oldProperty, guid){
     this.type = this.constructor.name;
 
     if(!guid) {
@@ -28,7 +28,8 @@ Command = class Command {
     }
     this.stack = stack;
     this._userId = _userId;
-    this.property = property;
+    this.property = property || {};
+    this.oldProperty = oldProperty || {};
   }
 
   /**
@@ -41,7 +42,8 @@ Command = class Command {
       stackName: this.stack.stackName,
       type: this.type,
       _userId: this._userId,
-      property: this.property
+      property: this.property,
+      oldProperty: this.oldProperty
     };
   }
 
@@ -54,7 +56,7 @@ Command = class Command {
       return;
     }
 
-    this.stack.push(this, true);
+    this.stack.push(this);
   }
 
   /**
