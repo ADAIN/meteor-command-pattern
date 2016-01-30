@@ -51,6 +51,8 @@ CommandStack = class CommandStack{
         }
       });
 
+      self.checkUndoRedo(stackName);
+
       if(callback) {
         callback(self);
       }
