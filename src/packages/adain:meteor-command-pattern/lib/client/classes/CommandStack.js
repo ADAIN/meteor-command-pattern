@@ -19,12 +19,17 @@ CommandStack = class CommandStack{
    */
   constructor(stackName, callback, isSkip, isGlobal) {
     const self = this;
-    this.stackName = stackName;
-    this.isGlobal = !!isGlobal;
+    self.stackName = stackName;
+    self.isGlobal = !!isGlobal;
+    self.const = {
+      EXEC: 'EXEC',
+      UNDO: 'UNDO',
+      REDO: 'REDO'
+    };
     isSkip = !!isSkip;
-    this.clear();
+    self.clear();
 
-    this.subscription = Meteor.subscribe('command', stackName, function(){
+    self.subscription = Meteor.subscribe('command', stackName, function(){
       self.commandCursor = CommandCollection.find({stackName: stackName}, {sort: {createdAt: 1}});
       self.totalCount = self.commandCursor.count();
       self.observer = self.commandCursor.observe({
@@ -35,14 +40,14 @@ CommandStack = class CommandStack{
           }
 
           if(!doc.isRemoved){
-            self.execCommand(doc, true);
+            self.execCommand(doc, self.const.EXEC);
           }
 
           self.checkUndoRedo(stackName);
 
         },
         changed: function(doc){
-          self.execCommand(doc, !doc.isRemoved);
+          self.execCommand(doc, (doc.isRemoved) ? self.const.UNDO: self.const.REDO);
           self.checkUndoRedo(stackName);
         },
         removed: function(doc){
@@ -106,9 +111,9 @@ CommandStack = class CommandStack{
   /**
    * execute command
    * @param commandData
-   * @param isDo
+   * @param type
    */
-  execCommand(commandData, isDo){
+  execCommand(commandData, type){
     let command;
     const self = this;
     if(!self._stack[commandData.guid]){
@@ -126,10 +131,18 @@ CommandStack = class CommandStack{
       command = self._stack[commandData.guid];
     }
 
-    if(isDo){
-      command.exec();
-    }else{
-      command.undo();
+    switch (type){
+      case self.const.EXEC:
+        command.exec();
+        break;
+
+      case self.const.UNDO:
+        command.undo();
+        break;
+
+      case self.const.REDO:
+        command.redo();
+        break;
     }
   }
 

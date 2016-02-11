@@ -74,4 +74,11 @@ Command = class Command {
   undo(){
 
   }
+
+  /**
+   * redo command
+   */
+  redo(){
+    this.exec();
+  }
 };
