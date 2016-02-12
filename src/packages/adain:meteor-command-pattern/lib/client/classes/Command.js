@@ -19,7 +19,7 @@ Command = class Command {
    * @param {string} [guid]
    */
   constructor(stack, _userId, property, oldProperty, guid){
-    this.type = this.constructor.name;
+    this.type = 'Command';
 
     if(!guid) {
       this.guid = Guid.raw();

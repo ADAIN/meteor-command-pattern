@@ -11,6 +11,19 @@
 AddDivCommand = class AddDivCommand extends Command{
 
   /**
+   * init command
+   * @param {CommandStack} stack
+   * @param {string} [_userId]
+   * @param {object} [property]
+   * @param {string} [oldProperty]
+   * @param {string} [guid]
+   */
+  constructor(stack, _userId, property, oldProperty, guid){
+    super(stack, _userId, property, oldProperty, guid);
+    this.type = 'AddDivCommand';
+  }
+
+  /**
    * exec
    * @method
    * @override
