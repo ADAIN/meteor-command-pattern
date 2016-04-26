@@ -222,7 +222,7 @@ CommandStack = class CommandStack{
       query._userId = Meteor.userId();
     }
 
-    let commandData = CommandCollection.findOne(query, {sort: {createdAt: 1}});
+    return CommandCollection.findOne(query, {sort: {createdAt: 1}});
   }
 
   /**
