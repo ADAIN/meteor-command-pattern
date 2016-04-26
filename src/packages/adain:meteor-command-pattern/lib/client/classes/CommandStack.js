@@ -180,16 +180,24 @@ CommandStack = class CommandStack{
   }
 
   /**
-   * undo
-   * @returns {Command}
+   * get undo data
+   * @returns {any}
    */
-  undo(){
+  getUndoData(){
     let query = {stackName: this.stackName, isRemoved: false};
     if(!this.isGlobal){
       query._userId = Meteor.userId();
     }
 
-    let commandData = CommandCollection.findOne(query, {sort: {createdAt: -1}});
+    return CommandCollection.findOne(query, {sort: {createdAt: -1}});
+  }
+
+  /**
+   * undo
+   * @returns {Command}
+   */
+  undo(){
+    let commandData = this.getUndoData();
     if(commandData){
       if(this.isGlobal && commandData._userId !== Meteor.userId()){
         Meteor.call('CommandCollection.methods.update', {_id: commandData._id}, {$set: {isRemoved: true}}, function(err){
@@ -206,16 +214,23 @@ CommandStack = class CommandStack{
   }
 
   /**
-   * redo
-   * @returns {Command}
+   * get redo data
    */
-  redo(){
+  getRedoData(){
     let query = {stackName: this.stackName, isRemoved: true};
     if(!this.isGlobal){
       query._userId = Meteor.userId();
     }
 
     let commandData = CommandCollection.findOne(query, {sort: {createdAt: 1}});
+  }
+
+  /**
+   * redo
+   * @returns {Command}
+   */
+  redo(){
+    let commandData = this.getRedoData();
     if(commandData){
       if(this.isGlobal && commandData._userId !== Meteor.userId()){
         Meteor.call('CommandCollection.methods.update', {_id: commandData._id}, {$set: {isRemoved: false}}, function(err){
