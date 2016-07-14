@@ -8,6 +8,8 @@ const CommandCollection = new Mongo.Collection('Command');
 
 if(Meteor.isServer){
   CommandCollection._ensureIndex({'stackName': 1, 'isRemoved': 1});
+  CommandCollection._ensureIndex({'_userId': 1});
+  CommandCollection._ensureIndex({'createdAt': 1});
 }
 
 CommandCollection.allow({

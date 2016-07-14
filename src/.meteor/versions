@@ -2,7 +2,7 @@ accounts-base@1.2.8
 accounts-password@1.1.12
 accounts-ui@1.1.9
 accounts-ui-unstyled@1.1.12
-adain:meteor-command-pattern@3.0.1
+adain:meteor-command-pattern@3.0.3
 adain:meteor-guid@1.0.1
 allow-deny@1.0.5
 autoupdate@1.2.11
