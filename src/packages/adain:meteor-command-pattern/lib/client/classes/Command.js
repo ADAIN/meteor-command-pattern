@@ -5,10 +5,10 @@
  */
 
 /**
- * @class Command Command
+ * @class Command
  * @constructor
  */
-Command = class Command {
+export default class Command {
 
   /**
    * init command
@@ -81,4 +81,4 @@ Command = class Command {
   redo(){
     this.exec();
   }
-};
+}

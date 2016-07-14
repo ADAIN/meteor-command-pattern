@@ -4,6 +4,8 @@
  * description : command publication
  */
 
+import CommandCollection from '../collections/CommandCollection';
+
 Meteor.publish('command', function (stackName) {
   check(stackName, String);
   if(this.userId){

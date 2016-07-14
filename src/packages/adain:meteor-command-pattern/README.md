@@ -13,11 +13,14 @@ $ meteor add adain:meteor-command-pattern
 ```
 ## Make custom command
 ```javascript
+
+import { Command, CommandFactory } from 'meteor/adain:meteor-command-pattern';
+
 /**
  * add div command
  * @class
  */
-CustomCommand = class CustomCommand extends Command{
+export default class CustomCommand extends Command{
 
   /**
    * init command
@@ -58,17 +61,19 @@ CommandFactory.add("CustomCommand", CustomCommand);
 ```
 ## Make stack
 ```javascript
+import { CommandStack } from 'meteor/adain:meteor-command-pattern';
+
 // if this set true the commands will skip at the first time. This is useful when you using own serialize code.
-var isSkip = false;
+let isSkip = false;
 // if this set true global undo redo activate, false is user account base undo, redo
-var isGlobal = true;
-var stack = new CommandStack('myStack', function(){
+let isGlobal = true;
+let stack = new CommandStack('myStack', function(){
   isReady = true;
 }, isSkip, isGlobal);
 ```
 ## Execute command
 ```javascript
-var myCommand = new CustomCommand(stack, Meteor.userId(), {
+let myCommand = new CustomCommand(stack, Meteor.userId(), {
   myData: data
 });
 myCommand.execute();

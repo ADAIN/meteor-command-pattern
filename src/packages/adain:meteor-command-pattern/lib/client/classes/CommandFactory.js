@@ -4,13 +4,17 @@
  * description : command factory
  */
 
-CommandFactory = {
-  commandList: {},
+export default CommandFactory = {
 
   /**
+   * command list
+   */
+  commandList: {},
+  
+  /**
    * add command to list
-   * @param commandName
-   * @param commandClass
+   * @param {String} commandName
+   * @param {String} commandClass
    */
   add(commandName, commandClass){
     this.commandList[commandName] = commandClass;

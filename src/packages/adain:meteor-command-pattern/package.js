@@ -6,7 +6,7 @@
 Package.describe({
   name: 'adain:meteor-command-pattern',
   summary: 'Implement command pattern using meteor collection',
-  version: '2.7.1',
+  version: '3.0.0',
   git: 'https://github.com/ADAIN/meteor-command-pattern/tree/master/src/packages/adain:meteor-command-pattern'
 });
 
@@ -27,19 +27,7 @@ Package.onUse(function (api) {
     'check@1.1.0',
     'ecmascript@0.1.6'
   ], ['client', 'server']);
-
-  api.addFiles('lib/collections/CommandCollection.js', ['client', 'server']);
-
-  api.addFiles('lib/client/classes/Command.js', 'client');
-  api.addFiles('lib/client/classes/CommandFactory.js', 'client');
-  api.addFiles('lib/client/classes/CommandStack.js', 'client');
-
-  api.addFiles('lib/server/command_publication.js', 'server');
-
-  api.export('CommandCollection', ['client', 'server']);
-
-  api.export('Command', 'client');
-  api.export('CommandFactory', 'client');
-  api.export('CommandStack', 'client');
-
+  
+  api.mainModule('./lib/client/index.js', 'client');
+  api.mainModule('./lib/server/index.js', 'server');
 });

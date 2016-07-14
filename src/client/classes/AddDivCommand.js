@@ -4,11 +4,14 @@
  * description : MyCommand
  */
 
+import { Command, CommandFactory } from 'meteor/adain:meteor-command-pattern';
+
+
 /**
  * add div command
  * @class
  */
-AddDivCommand = class AddDivCommand extends Command{
+export default class AddDivCommand extends Command{
 
   /**
    * init command
@@ -40,7 +43,7 @@ AddDivCommand = class AddDivCommand extends Command{
   undo(){
     $("#" + this.guid).remove();
   }
-};
+}
 
 /**
  * add to command factory

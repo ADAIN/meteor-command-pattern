@@ -4,6 +4,9 @@
  * description : main
  */
 
+import { CommandStack } from 'meteor/adain:meteor-command-pattern';
+import AddDivCommand from './classes/AddDivCommand';
+
 var stack = null;
 var isReady = false;
 

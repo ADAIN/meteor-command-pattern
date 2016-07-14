@@ -4,18 +4,21 @@
  * description : command stack
  */
 
+import CommandCollection from '../../collections/CommandCollection';
+import CommandFactory from './CommandFactory';
+
 /**
  * @class CommandStack command stack
  */
-CommandStack = class CommandStack{
+export default class CommandStack{
 
   /**
    * initialize
    * @constructor
-   * @param {string} stackName
-   * @param {function} callback Fire when command subscribe is ready.
-   * @param {boolean} isSkip If this set true the commands will skip at the first time. This is useful when you using own serialize code.
-   * @param {boolean} isGlobal If this set true global undo redo activate, false is user account base undo, redo
+   * @param {String} stackName
+   * @param {Function} callback Fire when command subscribe is ready.
+   * @param {Boolean} isSkip If this set true the commands will skip at the first time. This is useful when you using own serialize code.
+   * @param {Boolean} isGlobal If this set true global undo redo activate, false is user account base undo, redo
    */
   constructor(stackName, callback, isSkip, isGlobal) {
     const self = this;
@@ -47,7 +50,7 @@ CommandStack = class CommandStack{
 
         },
         changed: function(doc){
-          self.execCommand(doc, (doc.isRemoved) ? self.const.UNDO: self.const.REDO);
+          self.execCommand(doc, (doc.isRemoved) ? self.const.UNDO : self.const.REDO);
           self.checkUndoRedo(stackName);
         },
         removed: function(doc){
@@ -110,8 +113,8 @@ CommandStack = class CommandStack{
 
   /**
    * execute command
-   * @param commandData
-   * @param type
+   * @param {String} commandData
+   * @param {String} type
    */
   execCommand(commandData, type){
     let command;
@@ -125,7 +128,10 @@ CommandStack = class CommandStack{
       }
 
       if(!command){
-        console.error(commandData.type + ' is not found.\nAdd your command to CommandFactory using CommandFactory.add("' + commandData.type + '", ' + commandData + ');');
+        console.error(`
+        ${commandData.type} is not found.
+        Add your command to CommandFactory using CommandFactory.add("' + commandData.type + '", ' + commandData + ');
+        `);
       }
     }else{
       command = self._stack[commandData.guid];
@@ -142,6 +148,10 @@ CommandStack = class CommandStack{
 
       case self.const.REDO:
         command.redo();
+        break;
+      
+      default:
+        console.error(`Undefined Command Type : ${type}`);
         break;
     }
   }
@@ -246,4 +256,4 @@ CommandStack = class CommandStack{
     return commandData;
   }
 
-};
+}

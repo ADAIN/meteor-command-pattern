@@ -4,7 +4,7 @@
  * description : command collection
  */
 
-CommandCollection = new Mongo.Collection('Command');
+const CommandCollection = new Mongo.Collection('Command');
 
 if(Meteor.isServer){
   CommandCollection._ensureIndex('stackName');
@@ -57,3 +57,5 @@ if(Meteor.isServer){
     }
   });
 }
+
+export default CommandCollection;
