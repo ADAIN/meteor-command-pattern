@@ -7,8 +7,8 @@
 import { CommandStack } from 'meteor/adain:meteor-command-pattern';
 import AddDivCommand from './classes/AddDivCommand';
 
-var stack = null;
-var isReady = false;
+let stack = null;
+let isReady = false;
 
 Template.main.onCreated(function () {
   stack = new CommandStack('inc', function(){
