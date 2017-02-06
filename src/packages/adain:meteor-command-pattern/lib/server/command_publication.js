@@ -5,11 +5,14 @@
  */
 
 import CommandCollection from '../collections/CommandCollection';
+import CommandPublishPermission from './CommandPublishPermission';
 
 Meteor.publish('command', function (stackName) {
   check(stackName, String);
   if(this.userId){
-    return CommandCollection.find({stackName: stackName}, {sort: {createdAt: 1}});
+    if(CommandPublishPermission.check.call(this, stackName)){
+      return CommandCollection.find({stackName: stackName}, {sort: {createdAt: 1}});
+    }
   }else{
     this.ready();
   }
