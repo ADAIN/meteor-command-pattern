@@ -139,15 +139,21 @@ export default class CommandStack{
 
     switch (type){
       case self.const.EXEC:
-        command.exec();
+        _.delay(()=>{
+          command.exec();
+        }, 0);
         break;
 
       case self.const.UNDO:
-        command.undo();
+        _.delay(()=>{
+          command.undo();
+        }, 0);
         break;
 
       case self.const.REDO:
-        command.redo();
+        _.delay(()=>{
+          command.redo();
+        }, 0);
         break;
       
       default:
