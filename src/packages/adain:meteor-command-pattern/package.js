@@ -6,7 +6,7 @@
 Package.describe({
   name: 'adain:meteor-command-pattern',
   summary: 'Implement command pattern using meteor collection',
-  version: '3.1.0',
+  version: '3.1.1',
   git: 'https://github.com/ADAIN/meteor-command-pattern/tree/master/src/packages/adain:meteor-command-pattern'
 });
 

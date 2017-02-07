@@ -173,9 +173,7 @@ export default class CommandStack{
     commandData.createdAt = new Date();
 
     let query = {stackName: this.stackName, isRemoved: true};
-    if(!this.isGlobal){
-      query._userId = Meteor.userId();
-    }
+    query._userId = Meteor.userId();
 
     if(this.isGlobal){
       Meteor.call('CommandCollection.methods.remove', query, function(err){
