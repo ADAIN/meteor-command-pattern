@@ -16,16 +16,9 @@ export default class Command {
    * @param {string} [_userId]
    * @param {object} [property]
    * @param {string} [oldProperty]
-   * @param {string} [guid]
    */
-  constructor(stack, _userId, property, oldProperty, guid){
+  constructor(stack, _userId, property, oldProperty){
     this.type = 'Command';
-
-    if(!guid) {
-      this.guid = Guid.raw();
-    }else{
-      this.guid = guid;
-    }
     this.stack = stack;
     this._userId = _userId;
     this.property = property || {};
@@ -34,11 +27,10 @@ export default class Command {
 
   /**
    * get command data
-   * @returns {{guid: *, stackName: *, type: *, _userId: *, property: *}}
+   * @returns {{stackName: *, type: *, _userId: *, property: *}}
    */
   getData(){
     return {
-      guid: this.guid,
       stackName: this.stack.stackName,
       type: this.type,
       _userId: this._userId,

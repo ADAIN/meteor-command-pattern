@@ -28,10 +28,9 @@ export default class CustomCommand extends Command{
    * @param {string} [_userId]
    * @param {object} [property]
    * @param {string} [oldProperty]
-   * @param {string} [guid]
    */
-  constructor(stack, _userId, property, oldProperty, guid){
-    super(stack, _userId, property, oldProperty, guid);
+  constructor(stack, _userId, property, oldProperty){
+    super(stack, _userId, property, oldProperty);
     this.type = 'CustomCommand';
   }
   

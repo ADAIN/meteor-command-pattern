@@ -54,7 +54,7 @@ export default class CommandStack{
           self.checkUndoRedo(stackName);
         },
         removed: function(doc){
-          self._stack[doc.guid] = undefined;
+          self._stack[doc._id] = undefined;
           self.checkUndoRedo(stackName);
         }
       });
@@ -119,12 +119,12 @@ export default class CommandStack{
   execCommand(commandData, type){
     let command;
     const self = this;
-    if(!self._stack[commandData.guid]){
+    if(!self._stack[commandData._id]){
 
       if(CommandFactory.commandList[commandData.type]){
-        command = new CommandFactory.commandList[commandData.type](self, commandData._userId, commandData.property, commandData.oldProperty, commandData.guid);
+        command = new CommandFactory.commandList[commandData.type](self, commandData._userId, commandData.property, commandData.oldProperty, commandData._id);
       }else if(window[commandData.type]){
-        command = new window[commandData.type](self, commandData._userId, commandData.property, commandData.oldProperty, commandData.guid);
+        command = new window[commandData.type](self, commandData._userId, commandData.property, commandData.oldProperty, commandData._id);
       }
 
       if(!command){
@@ -134,7 +134,7 @@ export default class CommandStack{
         `);
       }
     }else{
-      command = self._stack[commandData.guid];
+      command = self._stack[commandData._id];
     }
 
     switch (type){
@@ -188,7 +188,7 @@ export default class CommandStack{
       });
     }
 
-    this._stack[command.guid] = command;
+    this._stack[command._id] = command;
 
     CommandCollection.insert(commandData);
   }
