@@ -16,13 +16,15 @@ export default class Command {
    * @param {string} [_userId]
    * @param {object} [property]
    * @param {string} [oldProperty]
+   * @param {string} [message]
    */
-  constructor(stack, _userId, property, oldProperty){
+  constructor(stack, _userId, property, oldProperty, message){
     this.type = 'Command';
     this.stack = stack;
     this._userId = _userId;
     this.property = property || {};
     this.oldProperty = oldProperty || {};
+    this.message = message || '';
   }
 
   /**
@@ -35,7 +37,8 @@ export default class Command {
       type: this.type,
       _userId: this._userId,
       property: this.property,
-      oldProperty: this.oldProperty
+      oldProperty: this.oldProperty,
+      message: this.message
     };
   }
 
