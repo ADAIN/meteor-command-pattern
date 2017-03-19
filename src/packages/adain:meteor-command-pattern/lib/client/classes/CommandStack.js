@@ -212,8 +212,17 @@ export default class CommandStack{
    */
   undo(){
     let commandData = this.getUndoData();
+    return this.undoCommand(commandData);
+  }
+
+  /**
+   * undo command with command data
+   * @param commandData
+   * @returns {*}
+   */
+  undoCommand(commandData){
     if(commandData){
-      if(this.isGlobal && commandData._userId !== Meteor.userId()){
+      if(this.isGlobal || commandData._userId !== Meteor.userId()){
         Meteor.call('CommandCollection.methods.update', {_id: commandData._id}, {$set: {isRemoved: true}}, function(err){
           if(err){
             console.error(err);
@@ -223,7 +232,6 @@ export default class CommandStack{
         CommandCollection.update({_id: commandData._id}, {$set: {isRemoved: true}});
       }
     }
-
     return commandData;
   }
 
@@ -245,6 +253,15 @@ export default class CommandStack{
    */
   redo(){
     let commandData = this.getRedoData();
+    return this.redoCommand(commandData);
+  }
+
+  /**
+   * redo command with command data
+   * @param commandData
+   * @returns {*}
+   */
+  redoCommand(commandData){
     if(commandData){
       if(this.isGlobal && commandData._userId !== Meteor.userId()){
         Meteor.call('CommandCollection.methods.update', {_id: commandData._id}, {$set: {isRemoved: false}}, function(err){
