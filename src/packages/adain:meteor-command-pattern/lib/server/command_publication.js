@@ -9,9 +9,14 @@ import CommandPublishPermission from './CommandPublishPermission';
 
 Meteor.publish('command', function (stackName) {
   check(stackName, String);
-  if(CommandPublishPermission.check.call(this, stackName)){
-    return CommandCollection.find({stackName: stackName}, {sort: {createdAt: 1}});
-  }else{
+  try{
+    if(CommandPublishPermission.check.call(this, stackName)){
+      return CommandCollection.find({stackName: stackName}, {sort: {createdAt: 1}});
+    }else{
+      this.ready();
+    }  
+  }catch(e){
     this.ready();
   }
+  
 });
