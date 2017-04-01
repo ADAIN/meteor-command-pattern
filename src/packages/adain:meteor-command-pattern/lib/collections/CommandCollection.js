@@ -27,7 +27,7 @@ CommandCollection.allow({
     this.userId = userId;
     return CommandPublishPermission.check.call(this, doc.stackName);
   },
-  fetch: ['_userId']
+  fetch: ['stackName', '_userId']
 });
 
 if(Meteor.isServer){

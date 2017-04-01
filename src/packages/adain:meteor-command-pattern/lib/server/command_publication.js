@@ -31,7 +31,7 @@ Meteor.publish('command:old', function (stackName, datetime, isGlobal) {
   check(stackName, String);
   check(datetime, Number);
   check(isGlobal, Boolean);
-
+  
   let query = {stackName: stackName, createdAt: {$lte: new Date(datetime)}};
   if(!isGlobal){
     query._userId = this.userId;
