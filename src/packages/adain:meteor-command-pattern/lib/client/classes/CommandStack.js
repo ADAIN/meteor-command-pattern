@@ -345,23 +345,38 @@ export default class CommandStack{
     return commandData;
   }
 
+  getUndoToCommandData(commandData){
+    let query = {stack: commandData.stack, isRemoved: false, createdAt: {$gte: commandData.createdAt}};
+    return CommandCollection.find(query, {sort: {createdAt: -1}}).fetch();
+  }
+  
   /**
    * undo to command point
-   * @param commandData
+   * @param targetCommands
    */
-  undoToCommand(commandData){
-    let query = {stack: commandData.stack, isRemoved: false, createdAt: {$gte: commandData.createdAt}};
-    let targetCommands = CommandCollection.find(query, {sort: {createdAt: -1}}).fetch();
+  undoToCommand(targetCommands){
     _.each(targetCommands, (targetCommand)=>{
       this.undoCommand(targetCommand);
     });
+    
+    return targetCommands;
   }
   
-  redoToCommand(commandData){
+  getRedoToCommandData(commandData){
     let query = {stack: commandData.stack, isRemoved: true, createdAt: {$lte: commandData.createdAt}};
-    let targetCommands = CommandCollection.find(query, {sort: {createdAt: 1}}).fetch();
+    return CommandCollection.find(query, {sort: {createdAt: 1}}).fetch();
+  }
+
+  /**
+   * redo to command point
+   * @param targetCommands
+   * @returns {*}
+   */
+  redoToCommand(targetCommands){
     _.each(targetCommands, (targetCommand)=>{
       this.redoCommand(targetCommand);
     });
+    
+    return targetCommands;
   }
 }
