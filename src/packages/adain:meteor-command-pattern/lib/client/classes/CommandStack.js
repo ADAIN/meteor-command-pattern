@@ -276,6 +276,9 @@ export default class CommandStack{
    */
   undo(){
     let commandData = this.getUndoData();
+    if(this.isSkip){
+      this.loadMore();
+    }
     return this.undoCommand(commandData);
   }
 
@@ -296,11 +299,7 @@ export default class CommandStack{
         CommandCollection.update({_id: commandData._id}, {$set: {isRemoved: true}});
       }
     }
-    
-    if(this.isSkip){
-      this.loadMore();
-    }
-    
+
     return commandData;
   }
 
@@ -346,4 +345,23 @@ export default class CommandStack{
     return commandData;
   }
 
+  /**
+   * undo to command point
+   * @param commandData
+   */
+  undoToCommand(commandData){
+    let query = {stack: commandData.stack, isRemoved: false, createdAt: {$gte: commandData.createdAt}};
+    let targetCommands = CommandCollection.find(query, {sort: {createdAt: -1}}).fetch();
+    _.each(targetCommands, (targetCommand)=>{
+      this.undoCommand(targetCommand);
+    });
+  }
+  
+  redoToCommand(commandData){
+    let query = {stack: commandData.stack, isRemoved: true, createdAt: {$lte: commandData.createdAt}};
+    let targetCommands = CommandCollection.find(query, {sort: {createdAt: 1}}).fetch();
+    _.each(targetCommands, (targetCommand)=>{
+      this.redoCommand(targetCommand);
+    });
+  }
 }
