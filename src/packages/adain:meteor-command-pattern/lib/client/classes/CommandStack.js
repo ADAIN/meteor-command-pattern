@@ -37,7 +37,8 @@ export default class CommandStack{
     self.subscription = [];
     self.canUndo = new ReactiveVar(false);
     self.canRedo = new ReactiveVar(false);
-
+    self.isLoading = false;
+    
     self.commandCursor = CommandCollection.find({stackName}, {sort: {createdAt: 1}});
     
     if(!isSkip){
@@ -59,7 +60,9 @@ export default class CommandStack{
           self.checkUndoRedo();
         }
       });
-      self.subscription.push(Meteor.subscribe('command', stackName, function(){
+      self.isLoading = true;
+      self.subscription.push(Meteor.subscribe('command', stackName, self.isGlobal, function(){
+        self.isLoading = false;
         self.totalCount = CommandCollection.find({stackName}).count();
         if(callback) {
           callback(self);
@@ -90,8 +93,8 @@ export default class CommandStack{
           self.checkUndoRedo();
         }
       });
-      self.subscription.push(Meteor.subscribe('command:new', stackName, self.currentDateTime));
-      Meteor.call('CommandCollection.methods.getTotalAndLast', {stackName}, (err, res)=>{
+      self.subscription.push(Meteor.subscribe('command:new', stackName, self.currentDateTime, self.isGlobal));
+      Meteor.call('CommandCollection.methods.getTotalAndLast', {stackName, isGlobal: self.isGlobal}, (err, res)=>{
         if(!err && res){
           self.totalCount = res.total;
           self.last = res.last;
@@ -107,11 +110,15 @@ export default class CommandStack{
    */
   loadMore(callback){
     const self = this;
-    if(!self.last || self.currentDateTime === self.last){
+    if(self.isLoading || !self.last || self.currentDateTime === self.last){
       return;
     }
+    
+    self.isLoading = true;
 
-    self.subscription.push(Meteor.subscribe('command:old', self.stackName, self.currentDateTime, function(){
+    self.subscription.push(Meteor.subscribe('command:old', self.stackName, self.currentDateTime, self.isGlobal, function(){
+      self.isLoading = false;
+      
       let lastLoaded = CommandCollection.findOne({stackName: self.stackName}, {sort: {createdAt: 1}});
       if(lastLoaded){
         self.currentDateTime = lastLoaded.createdAt.getTime();

@@ -12,14 +12,19 @@ if(Meteor.isServer){
   CommandCollection._ensureIndex({'stackName': 1, 'createdAt': 1});
 }
 
+CommandCollection.LOAD_COUNT = 20;
+
 CommandCollection.allow({
   insert: function (userId, doc) {
+    this.userId = userId;
     return CommandPublishPermission.check.call(this, doc.stackName);
   },
   update: function (userId, doc, fields, modifier) {
+    this.userId = userId;
     return CommandPublishPermission.check.call(this, doc.stackName);
   },
   remove: function (userId, doc) {
+    this.userId = userId;
     return CommandPublishPermission.check.call(this, doc.stackName);
   },
   fetch: ['_userId']
@@ -49,10 +54,15 @@ if(Meteor.isServer){
       return CommandCollection.remove(query);
     },
     
-    'CommandCollection.methods.getTotalAndLast': function(query){
-      check(query, Object);
+    'CommandCollection.methods.getTotalAndLast': function(data){
+      check(data, Object);
 
-      CommandPublishPermission.check.call(this, query.stackName);
+      CommandPublishPermission.check.call(this, data.stackName);
+      
+      let query = {stackName: data.stackName};
+      if(!data.isGlobal){
+        query._userId = Meteor.userId();
+      }
       
       let last = CommandCollection.findOne(query, {sort: {createdAt: 1}, fields: {createdAt: 1}});
       return {
