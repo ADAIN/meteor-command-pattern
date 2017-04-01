@@ -111,6 +111,9 @@ export default class CommandStack{
   loadMore(callback){
     const self = this;
     if(self.isLoading || !self.last || self.currentDateTime === self.last){
+      if(callback) {
+        callback(self);
+      }
       return;
     }
     
