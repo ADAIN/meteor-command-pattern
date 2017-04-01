@@ -32,7 +32,7 @@ Meteor.publish('command:old', function (stackName, datetime, isGlobal) {
   check(datetime, Number);
   check(isGlobal, Boolean);
   
-  let query = {stackName: stackName, createdAt: {$lte: new Date(datetime)}};
+  let query = {stackName: stackName, createdAt: {$lt: new Date(datetime)}};
   if(!isGlobal){
     query._userId = this.userId;
   }
@@ -47,12 +47,42 @@ Meteor.publish('command:old', function (stackName, datetime, isGlobal) {
   }
 });
 
+Meteor.publish('command:latestUndo', function (stackName) {
+  check(stackName, String);
+
+  let query = {stackName: stackName, isRemoved: false};
+  try{
+    if(CommandPublishPermission.check.call(this, stackName)){
+      return CommandCollection.find(query, {sort: {createdAt: -1}, limit: 5});
+    }else{
+      this.ready();
+    }
+  }catch(e){
+    this.ready();
+  }
+});
+
+Meteor.publish('command:latestRedo', function (stackName) {
+  check(stackName, String);
+
+  let query = {stackName: stackName, isRemoved: true};
+  try{
+    if(CommandPublishPermission.check.call(this, stackName)){
+      return CommandCollection.find(query, {sort: {createdAt: 1}, limit: 5});
+    }else{
+      this.ready();
+    }
+  }catch(e){
+    this.ready();
+  }
+});
+
 Meteor.publish('command:new', function (stackName, datetime, isGlobal){
   check(stackName, String);
   check(datetime, Number);
   check(isGlobal, Boolean);
 
-  let query = {stackName: stackName, createdAt: {$gt: new Date(datetime)}};
+  let query = {stackName: stackName, createdAt: {$gte: new Date(datetime)}};
   if(!isGlobal){
     query._userId = this.userId;
   }

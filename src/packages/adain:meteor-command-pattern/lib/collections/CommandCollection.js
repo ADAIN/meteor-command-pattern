@@ -20,12 +20,10 @@ CommandCollection.allow({
     return CommandPublishPermission.check.call(this, doc.stackName);
   },
   update: function (userId, doc, fields, modifier) {
-    this.userId = userId;
-    return CommandPublishPermission.check.call(this, doc.stackName);
+    return doc._userId === userId;
   },
   remove: function (userId, doc) {
-    this.userId = userId;
-    return CommandPublishPermission.check.call(this, doc.stackName);
+    return doc._userId === userId;
   },
   fetch: ['stackName', '_userId']
 });
@@ -35,6 +33,8 @@ if(Meteor.isServer){
     'CommandCollection.methods.insert': function(data){
       check(data, Object);
 
+      this.unblock();
+      
       CommandPublishPermission.check.call(this, data.stackName);
       return CommandCollection.insert(data);
     },
@@ -43,13 +43,28 @@ if(Meteor.isServer){
       check(query, Object);
       check(data, Object);
 
+      this.unblock();
+      
       CommandPublishPermission.check.call(this, query.stackName);
       return CommandCollection.update(query, data);
+    },
+    
+    'CommandCollection.methods.updateCommands': function(data){
+      check(data, Object);
+      
+      this.unblock();
+      CommandPublishPermission.check.call(this, data.stackName);
+      
+      _.each(data.targetCommands, (command)=>{
+        CommandCollection.update(command._id, {$set: {isRemoved: data.isRemoved}});
+      });
     },
 
     'CommandCollection.methods.remove': function(query){
       check(query, Object);
 
+      this.unblock();
+      
       CommandPublishPermission.check.call(this, query.stackName);
       return CommandCollection.remove(query);
     },
@@ -57,6 +72,8 @@ if(Meteor.isServer){
     'CommandCollection.methods.getTotalAndLast': function(data){
       check(data, Object);
 
+      this.unblock();
+      
       CommandPublishPermission.check.call(this, data.stackName);
       
       let query = {stackName: data.stackName};
@@ -69,6 +86,24 @@ if(Meteor.isServer){
         total: CommandCollection.find(query).count(),
         last: last ? last.createdAt.getTime() : false
       };
+    },
+    
+    'CommandCollection.methods.getUndoToCommandData': function(commandData){
+      check(commandData, Object);
+
+      this.unblock();
+      
+      let query = {stack: commandData.stack, isRemoved: false, createdAt: {$gte: commandData.createdAt}};
+      return CommandCollection.find(query, {sort: {createdAt: -1}}).fetch();
+    },
+
+    'CommandCollection.methods.getRedoToCommandData': function(commandData){
+      check(commandData, Object);
+      
+      this.unblock();
+
+      let query = {stack: commandData.stack, isRemoved: true, createdAt: {$lte: commandData.createdAt}};
+      return CommandCollection.find(query, {sort: {createdAt: 1}}).fetch();
     }
   });
 }

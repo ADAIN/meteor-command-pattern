@@ -94,55 +94,39 @@ export default class CommandStack{
         }
       });
       self.subscription.push(Meteor.subscribe('command:new', stackName, self.currentDateTime, self.isGlobal));
-      Meteor.call('CommandCollection.methods.getTotalAndLast', {stackName, isGlobal: self.isGlobal}, (err, res)=>{
-        if(!err && res){
-          self.totalCount = res.total;
-          self.last = res.last;
-          self.loadMore(callback);
-        }
-      });
-    }
-  }
+      self.subscription.push(Meteor.subscribe('command:latestUndo', self.stackName, ()=>{
+        self.checkUndo();
+      }));
+      self.subscription.push(Meteor.subscribe('command:latestRedo', self.stackName, ()=>{
+        self.checkRedo();
+      }));
 
-  /**
-   * this function for isSkip === true, paging load
-   * @param [callback]
-   */
-  loadMore(callback){
-    const self = this;
-    if(self.isLoading || !self.last || self.currentDateTime === self.last){
       if(callback) {
         callback(self);
       }
-      return;
     }
-    
-    self.isLoading = true;
-
-    self.subscription.push(Meteor.subscribe('command:old', self.stackName, self.currentDateTime, self.isGlobal, function(){
-      self.isLoading = false;
-      
-      let lastLoaded = CommandCollection.findOne({stackName: self.stackName}, {sort: {createdAt: 1}});
-      if(lastLoaded){
-        self.currentDateTime = lastLoaded.createdAt.getTime();
-      }
-      
-      self.checkUndoRedo();
-      if(callback) {
-        callback(self);
-      }
-    }));
   }
-
+  
   /**
    * check user can undo or redo
    */
   checkUndoRedo(){
+    this.checkUndo();
+    this.checkRedo();
+  }
+  
+  checkUndo(){
     if(this.isGlobal){
       this.canUndo.set(CommandCollection.find({stackName: this.stackName, isRemoved: false}).count() > 0);
-      this.canRedo.set(CommandCollection.find({stackName: this.stackName, isRemoved: true}).count() > 0);
     }else{
       this.canUndo.set(CommandCollection.find({stackName: this.stackName, _userId: Meteor.userId(), isRemoved: false}).count() > 0);
+    }
+  }
+  
+  checkRedo(){
+    if(this.isGlobal){
+      this.canRedo.set(CommandCollection.find({stackName: this.stackName, isRemoved: true}).count() > 0);
+    }else{
       this.canRedo.set(CommandCollection.find({stackName: this.stackName, _userId: Meteor.userId(), isRemoved: true}).count() > 0);
     }
   }
@@ -279,9 +263,6 @@ export default class CommandStack{
    */
   undo(){
     let commandData = this.getUndoData();
-    if(this.isSkip){
-      this.loadMore();
-    }
     return this.undoCommand(commandData);
   }
 
@@ -347,11 +328,6 @@ export default class CommandStack{
 
     return commandData;
   }
-
-  getUndoToCommandData(commandData){
-    let query = {stack: commandData.stack, isRemoved: false, createdAt: {$gte: commandData.createdAt}};
-    return CommandCollection.find(query, {sort: {createdAt: -1}}).fetch();
-  }
   
   /**
    * undo to command point
@@ -362,14 +338,10 @@ export default class CommandStack{
       this.undoCommand(targetCommand);
     });
     
+    this.checkUndoRedo();
     return targetCommands;
   }
   
-  getRedoToCommandData(commandData){
-    let query = {stack: commandData.stack, isRemoved: true, createdAt: {$lte: commandData.createdAt}};
-    return CommandCollection.find(query, {sort: {createdAt: 1}}).fetch();
-  }
-
   /**
    * redo to command point
    * @param targetCommands
@@ -379,7 +351,8 @@ export default class CommandStack{
     _.each(targetCommands, (targetCommand)=>{
       this.redoCommand(targetCommand);
     });
-    
+
+    this.checkUndoRedo();
     return targetCommands;
   }
 }
