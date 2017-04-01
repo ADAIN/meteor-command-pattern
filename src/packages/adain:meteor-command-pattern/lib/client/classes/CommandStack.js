@@ -16,9 +16,9 @@ export default class CommandStack{
    * initialize
    * @constructor
    * @param {String} stackName
-   * @param {Function} callback Fire when command subscribe is ready.
-   * @param {Boolean} isSkip If this set true the commands will skip at the first time. This is useful when you using own serialize code.
-   * @param {Boolean} isGlobal If this set true global undo redo activate, false is user account base undo, redo
+   * @param {Function} [callback] Fire when command subscribe is ready.
+   * @param {Boolean} [isSkip] If this set true the commands will skip at the first time. This is useful when you using own serialize code.
+   * @param {Boolean} [isGlobal] If this set true global undo redo activate, false is user account base undo, redo
    */
   constructor(stackName, callback, isSkip, isGlobal) {
     const self = this;
@@ -30,41 +30,99 @@ export default class CommandStack{
       REDO: 'REDO'
     };
     isSkip = !!isSkip;
-    self.clear();
+    self.loadedCount = 0;
+    self.totalCount = 0;
+    self.isSkip = isSkip;
+    self._stack = {};
+    self.subscription = [];
+    self.canUndo = new ReactiveVar(false);
+    self.canRedo = new ReactiveVar(false);
 
-    self.subscription = Meteor.subscribe('command', stackName, function(){
-      self.commandCursor = CommandCollection.find({stackName: stackName}, {sort: {createdAt: 1}});
-      self.totalCount = self.commandCursor.count();
+    self.commandCursor = CommandCollection.find({stackName}, {sort: {createdAt: 1}});
+    
+    if(!isSkip){
       self.observer = self.commandCursor.observe({
         added: function(doc){
-          if(isSkip && self.loadedCount < self.totalCount){
-            self.loadedCount++;
-            return;
-          }
-
           if(!doc.isRemoved){
             self.execCommand(doc, self.const.EXEC);
           }
 
-          self.checkUndoRedo(stackName);
+          self.checkUndoRedo();
 
         },
         changed: function(doc){
           self.execCommand(doc, (doc.isRemoved) ? self.const.UNDO : self.const.REDO);
-          self.checkUndoRedo(stackName);
+          self.checkUndoRedo();
         },
         removed: function(doc){
           self._stack[doc._id] = undefined;
-          self.checkUndoRedo(stackName);
+          self.checkUndoRedo();
         }
       });
+      self.subscription.push(Meteor.subscribe('command', stackName, function(){
+        self.totalCount = CommandCollection.find({stackName}).count();
+        if(callback) {
+          callback(self);
+        }
+      }));
+    }else{
+      self.currentDateTime = (new Date()).getTime();
+      self.startDateTime = self.currentDateTime;
+      
+      self.observer = self.commandCursor.observe({
+        added: function(doc){
+          if(doc.createdAt.getTime() < self.startDateTime){
+            return;
+          }
+          if(!doc.isRemoved){
+            self.execCommand(doc, self.const.EXEC);
+          }
 
-      self.checkUndoRedo(stackName);
+          self.checkUndoRedo();
 
+        },
+        changed: function(doc){
+          self.execCommand(doc, (doc.isRemoved) ? self.const.UNDO : self.const.REDO);
+          self.checkUndoRedo();
+        },
+        removed: function(doc){
+          self._stack[doc._id] = undefined;
+          self.checkUndoRedo();
+        }
+      });
+      self.subscription.push(Meteor.subscribe('command:new', stackName, self.currentDateTime));
+      Meteor.call('CommandCollection.methods.getTotalAndLast', {stackName}, (err, res)=>{
+        if(!err && res){
+          self.totalCount = res.total;
+          self.last = res.last;
+          self.loadMore(callback);
+        }
+      });
+    }
+  }
+
+  /**
+   * this function for isSkip === true, paging load
+   * @param [callback]
+   */
+  loadMore(callback){
+    const self = this;
+    console.log(CommandCollection.find({}).count());
+    if(!self.last || self.currentDateTime === self.last){
+      return;
+    }
+
+    self.subscription.push(Meteor.subscribe('command:old', self.stackName, self.currentDateTime, function(){
+      let lastLoaded = CommandCollection.findOne({stackName: self.stackName}, {sort: {createdAt: 1}});
+      if(lastLoaded){
+        self.currentDateTime = lastLoaded.createdAt.getTime();
+      }
+      
+      self.checkUndoRedo();
       if(callback) {
         callback(self);
       }
-    });
+    }));
   }
 
   /**
@@ -85,17 +143,17 @@ export default class CommandStack{
    * @method
    */
   clear() {
-    this._stack = {};
-    this.canUndo = new ReactiveVar(false);
-    this.canRedo = new ReactiveVar(false);
     if(this.observer){
       this.observer.stop();
     }
-    if(this.subscription){
-      this.subscription.stop();
+    if(this.subscription && this.subscription.length > 0){
+      _.each(this.subscription, (subs)=>{
+        if(subs){
+          subs.stop();  
+        }
+      });
     }
-    this.loadedCount = 0;
-    this.totalCount = 0;
+    
     this.observer = null;
     this.subscription = null;
   }
@@ -232,6 +290,11 @@ export default class CommandStack{
         CommandCollection.update({_id: commandData._id}, {$set: {isRemoved: true}});
       }
     }
+    
+    if(this.isSkip){
+      this.loadMore();
+    }
+    
     return commandData;
   }
 

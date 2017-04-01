@@ -6,7 +6,7 @@
 
 import CommandCollection from '../collections/CommandCollection';
 import './command_publication';
-import CommandPublishPermission from './CommandPublishPermission';
+import CommandPublishPermission from '../CommandPublishPermission';
 
 export {
   CommandCollection,

@@ -13,7 +13,7 @@ let isReady = false;
 Template.main.onCreated(function () {
   stack = new CommandStack('inc', function(){
     isReady = true;
-  }, false, false);
+  }, true, false);
 });
 
 Template.main.onRendered(function () {

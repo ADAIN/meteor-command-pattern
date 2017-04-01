@@ -8,10 +8,12 @@ import CommandCollection from '../collections/CommandCollection';
 import Command from './classes/Command';
 import CommandFactory from './classes/CommandFactory';
 import CommandStack from './classes/CommandStack';
+import CommandPublishPermission from '../CommandPublishPermission';
 
 export {
   CommandCollection,
   Command,
   CommandFactory,
-  CommandStack
+  CommandStack,
+  CommandPublishPermission
 };

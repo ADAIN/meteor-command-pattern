@@ -4,6 +4,8 @@
  * description : command collection
  */
 
+import CommandPublishPermission from '../CommandPublishPermission';  
+
 const CommandCollection = new Mongo.Collection('Command');
 
 if(Meteor.isServer){
@@ -12,15 +14,13 @@ if(Meteor.isServer){
 
 CommandCollection.allow({
   insert: function (userId, doc) {
-    // the user must be logged in, and the document must be owned by the user
-    return (userId && doc._userId === userId);
+    return CommandPublishPermission.check.call(this, doc.stackName);
   },
   update: function (userId, doc, fields, modifier) {
-    // can only change your own documents
-    return doc._userId === userId;
+    return CommandPublishPermission.check.call(this, doc.stackName);
   },
   remove: function (userId, doc) {
-    return doc._userId === userId;
+    return CommandPublishPermission.check.call(this, doc.stackName);
   },
   fetch: ['_userId']
 });
@@ -30,28 +30,35 @@ if(Meteor.isServer){
     'CommandCollection.methods.insert': function(data){
       check(data, Object);
 
-      if(this.userId){
-        return CommandCollection.insert(data);
-      }
-
-      return null;
+      CommandPublishPermission.check.call(this, data.stackName);
+      return CommandCollection.insert(data);
     },
 
     'CommandCollection.methods.update': function(query, data){
       check(query, Object);
       check(data, Object);
 
-      if(this.userId){
-        return CommandCollection.update(query, data);
-      }
+      CommandPublishPermission.check.call(this, query.stackName);
+      return CommandCollection.update(query, data);
     },
 
     'CommandCollection.methods.remove': function(query){
       check(query, Object);
 
-      if(this.userId){
-        return CommandCollection.remove(query);
-      }
+      CommandPublishPermission.check.call(this, query.stackName);
+      return CommandCollection.remove(query);
+    },
+    
+    'CommandCollection.methods.getTotalAndLast': function(query){
+      check(query, Object);
+
+      CommandPublishPermission.check.call(this, query.stackName);
+      
+      let last = CommandCollection.findOne(query, {sort: {createdAt: 1}, fields: {createdAt: 1}});
+      return {
+        total: CommandCollection.find(query).count(),
+        last: last ? last.createdAt.getTime() : false
+      };
     }
   });
 }
