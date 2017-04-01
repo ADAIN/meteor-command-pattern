@@ -35,6 +35,8 @@ Meteor.publish('command:old', function (stackName, datetime) {
 
 Meteor.publish('command:new', function (stackName, datetime){
   check(stackName, String);
+  check(datetime, Number);
+  
   try{
     if(CommandPublishPermission.check.call(this, stackName)){
       return CommandCollection.find({stackName: stackName, createdAt: {$gt: new Date(datetime)}}, {sort: {createdAt: 1}});

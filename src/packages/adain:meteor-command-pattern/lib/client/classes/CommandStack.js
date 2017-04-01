@@ -107,7 +107,6 @@ export default class CommandStack{
    */
   loadMore(callback){
     const self = this;
-    console.log(CommandCollection.find({}).count());
     if(!self.last || self.currentDateTime === self.last){
       return;
     }
