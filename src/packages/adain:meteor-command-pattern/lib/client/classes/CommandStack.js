@@ -334,11 +334,9 @@ export default class CommandStack{
    * @param targetCommands
    */
   undoToCommand(targetCommands){
-    _.each(targetCommands, (targetCommand)=>{
-      this.undoCommand(targetCommand);
+    Meteor.call('CommandCollection.methods.updateCommands', {stackName: this.stackName, targetCommands, isRemoved: true}, (err, res)=>{
+      this.checkUndoRedo();
     });
-    
-    this.checkUndoRedo();
     return targetCommands;
   }
   
@@ -348,11 +346,9 @@ export default class CommandStack{
    * @returns {*}
    */
   redoToCommand(targetCommands){
-    _.each(targetCommands, (targetCommand)=>{
-      this.redoCommand(targetCommand);
+    Meteor.call('CommandCollection.methods.updateCommands', {stackName: this.stackName, targetCommands, isRemoved: false}, (err, res)=>{
+      this.checkUndoRedo();
     });
-
-    this.checkUndoRedo();
     return targetCommands;
   }
 }
