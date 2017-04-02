@@ -19,20 +19,21 @@ export default class CommandStack{
    * @param {Function} [callback] Fire when command subscribe is ready.
    * @param {Boolean} [isSkip] If this set true the commands will skip at the first time. This is useful when you using own serialize code.
    * @param {Boolean} [isGlobal] If this set true global undo redo activate, false is user account base undo, redo
+   * @param {Boolean} [usePage] If use paging set true [Warning] If you want to use redoToCommand or undoToCommand, you should this option to false.
    */
-  constructor(stackName, callback, isSkip, isGlobal) {
+  constructor(stackName, callback, isSkip = false, isGlobal = false, usePage = false) {
     const self = this;
     self.stackName = stackName;
-    self.isGlobal = !!isGlobal;
+    self.isGlobal = isGlobal;
     self.const = {
       EXEC: 'EXEC',
       UNDO: 'UNDO',
       REDO: 'REDO'
     };
-    isSkip = !!isSkip;
+    self.usePage = usePage;
     self.loadedCount = 0;
     self.totalCount = 0;
-    self.isSkip = isSkip;
+    self.isSkip = usePage ? true : isSkip;
     self._stack = {};
     self.subscription = [];
     self.canUndo = new ReactiveVar(false);
@@ -41,9 +42,14 @@ export default class CommandStack{
     
     self.commandCursor = CommandCollection.find({stackName}, {sort: {createdAt: 1}});
     
-    if(!isSkip){
+    if(!usePage){
       self.observer = self.commandCursor.observe({
         added: function(doc){
+          if(isSkip && self.loadedCount < self.totalCount){
+            self.loadedCount++;
+            return;
+          }
+          
           if(!doc.isRemoved){
             self.execCommand(doc, self.const.EXEC);
           }
