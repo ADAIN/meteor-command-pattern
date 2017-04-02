@@ -93,7 +93,7 @@ if(Meteor.isServer){
 
       this.unblock();
       
-      let query = {stack: commandData.stack, isRemoved: false, createdAt: {$gte: commandData.createdAt}};
+      let query = {stackName: commandData.stackName, isRemoved: false, createdAt: {$gte: commandData.createdAt}};
       return CommandCollection.find(query, {sort: {createdAt: -1}}).fetch();
     },
 
@@ -102,7 +102,7 @@ if(Meteor.isServer){
       
       this.unblock();
 
-      let query = {stack: commandData.stack, isRemoved: true, createdAt: {$lte: commandData.createdAt}};
+      let query = {stackName: commandData.stackName, isRemoved: true, createdAt: {$lte: commandData.createdAt}};
       return CommandCollection.find(query, {sort: {createdAt: 1}}).fetch();
     }
   });
