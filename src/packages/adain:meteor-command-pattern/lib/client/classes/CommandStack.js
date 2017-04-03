@@ -41,35 +41,35 @@ export default class CommandStack{
     self.isLoading = false;
     
     self.commandCursor = CommandCollection.find({stackName}, {sort: {createdAt: 1}});
-    
     if(!usePage){
-      self.observer = self.commandCursor.observe({
-        added: function(doc){
-          if(isSkip && self.loadedCount < self.totalCount){
-            self.loadedCount++;
-            return;
-          }
-          
-          if(!doc.isRemoved){
-            self.execCommand(doc, self.const.EXEC);
-          }
-
-          self.checkUndoRedo();
-
-        },
-        changed: function(doc){
-          self.execCommand(doc, (doc.isRemoved) ? self.const.UNDO : self.const.REDO);
-          self.checkUndoRedo();
-        },
-        removed: function(doc){
-          self._stack[doc._id] = undefined;
-          self.checkUndoRedo();
-        }
-      });
       self.isLoading = true;
       self.subscription.push(Meteor.subscribe('command', stackName, self.isGlobal, function(){
         self.isLoading = false;
         self.totalCount = CommandCollection.find({stackName}).count();
+
+        self.observer = self.commandCursor.observe({
+          added: function(doc){
+            if(isSkip && self.loadedCount < self.totalCount){
+              self.loadedCount++;
+              return;
+            }
+            
+            if(!doc.isRemoved){
+              self.execCommand(doc, self.const.EXEC);
+            }
+
+            self.checkUndoRedo();
+
+          },
+          changed: function(doc){
+            self.execCommand(doc, (doc.isRemoved) ? self.const.UNDO : self.const.REDO);
+            self.checkUndoRedo();
+          },
+          removed: function(doc){
+            self._stack[doc._id] = undefined;
+            self.checkUndoRedo();
+          }
+        });
         if(callback) {
           callback(self);
         }
