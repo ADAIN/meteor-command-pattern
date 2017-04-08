@@ -70,6 +70,8 @@ export default class CommandStack{
             self.checkUndoRedo();
           }
         });
+
+        self.checkUndoRedo();
         if(callback) {
           callback(self);
         }
