@@ -43,7 +43,7 @@ export default class CommandStack{
     self.commandCursor = CommandCollection.find({stackName}, {sort: {createdAt: 1}});
     if(!usePage){
       self.isLoading = true;
-      self.subscription.push(Meteor.subscribe('command', stackName, self.isGlobal, function(){
+      self.subscription.push(Meteor.subscribe('command', stackName, function(){
         self.isLoading = false;
         self.totalCount = CommandCollection.find({stackName}).count();
 
@@ -101,7 +101,8 @@ export default class CommandStack{
           self.checkUndoRedo();
         }
       });
-      self.subscription.push(Meteor.subscribe('command:new', stackName, self.currentDateTime, self.isGlobal));
+      self.subscription.push(Meteor.subscribe('command:new', stackName, self.currentDateTime));
+      self.subscription.push(Meteor.subscribe('command:old', stackName, self.currentDateTime));
       self.subscription.push(Meteor.subscribe('command:latestUndo', self.stackName, ()=>{
         self.checkUndo();
       }));

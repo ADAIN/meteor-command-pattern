@@ -7,14 +7,10 @@
 import CommandCollection from '../collections/CommandCollection';
 import CommandPublishPermission from '../CommandPublishPermission';
 
-Meteor.publish('command', function (stackName, isGlobal) {
+Meteor.publish('command', function (stackName) {
   check(stackName, String);
-  check(isGlobal, Boolean);
 
   let query = {stackName: stackName};
-  if(!isGlobal){
-    query._userId = this.userId;
-  }
   
   try{
     if(CommandPublishPermission.check.call(this, stackName)){
@@ -27,15 +23,11 @@ Meteor.publish('command', function (stackName, isGlobal) {
   }
 });
 
-Meteor.publish('command:old', function (stackName, datetime, isGlobal) {
+Meteor.publish('command:old', function (stackName, datetime) {
   check(stackName, String);
   check(datetime, Number);
-  check(isGlobal, Boolean);
   
   let query = {stackName: stackName, createdAt: {$lt: new Date(datetime)}};
-  if(!isGlobal){
-    query._userId = this.userId;
-  }
   try{
     if(CommandPublishPermission.check.call(this, stackName)){
       return CommandCollection.find(query, {sort: {createdAt: -1}, limit: CommandCollection.LOAD_COUNT});
@@ -77,15 +69,11 @@ Meteor.publish('command:latestRedo', function (stackName) {
   }
 });
 
-Meteor.publish('command:new', function (stackName, datetime, isGlobal){
+Meteor.publish('command:new', function (stackName, datetime){
   check(stackName, String);
   check(datetime, Number);
-  check(isGlobal, Boolean);
 
   let query = {stackName: stackName, createdAt: {$gte: new Date(datetime)}};
-  if(!isGlobal){
-    query._userId = this.userId;
-  }
   try{
     if(CommandPublishPermission.check.call(this, stackName)){
       return CommandCollection.find(query, {sort: {createdAt: 1}});
