@@ -9,11 +9,13 @@ import Command from './classes/Command';
 import CommandFactory from './classes/CommandFactory';
 import CommandStack from './classes/CommandStack';
 import CommandPublishPermission from '../CommandPublishPermission';
+import CommandWritePermission from '../CommandWritePermission';
 
 export {
   CommandCollection,
   Command,
   CommandFactory,
   CommandStack,
-  CommandPublishPermission
+  CommandPublishPermission,
+  CommandWritePermission
 };

@@ -4,7 +4,8 @@
  * description : command collection
  */
 
-import CommandPublishPermission from '../CommandPublishPermission';  
+import CommandWritePermission from '../CommandWritePermission';
+import CommandPublishPermission from '../CommandPublishPermission';
 
 const CommandCollection = new Mongo.Collection('Command');
 
@@ -17,7 +18,7 @@ CommandCollection.LOAD_COUNT = 20;
 CommandCollection.allow({
   insert: function (userId, doc) {
     this.userId = userId;
-    return CommandPublishPermission.check.call(this, doc.stackName);
+    return CommandWritePermission.check.call(this, doc.stackName);
   },
   update: function (userId, doc, fields, modifier) {
     return doc._userId === userId;
@@ -35,7 +36,7 @@ if(Meteor.isServer){
 
       this.unblock();
       
-      CommandPublishPermission.check.call(this, data.stackName);
+      CommandWritePermission.check.call(this, data.stackName);
       return CommandCollection.insert(data);
     },
 
@@ -44,8 +45,8 @@ if(Meteor.isServer){
       check(data, Object);
 
       this.unblock();
-      
-      CommandPublishPermission.check.call(this, query.stackName);
+
+      CommandWritePermission.check.call(this, query.stackName);
       return CommandCollection.update(query, data);
     },
     
@@ -53,7 +54,7 @@ if(Meteor.isServer){
       check(data, Object);
       
       this.unblock();
-      CommandPublishPermission.check.call(this, data.stackName);
+      CommandWritePermission.check.call(this, data.stackName);
       
       _.each(data.targetCommands, (command)=>{
         CommandCollection.update(command._id, {$set: {isRemoved: data.isRemoved}});
@@ -64,8 +65,8 @@ if(Meteor.isServer){
       check(query, Object);
 
       this.unblock();
-      
-      CommandPublishPermission.check.call(this, query.stackName);
+
+      CommandWritePermission.check.call(this, query.stackName);
       return CommandCollection.remove(query);
     },
     
@@ -73,7 +74,7 @@ if(Meteor.isServer){
       check(data, Object);
 
       this.unblock();
-      
+
       CommandPublishPermission.check.call(this, data.stackName);
       
       let query = {stackName: data.stackName};
@@ -92,6 +93,8 @@ if(Meteor.isServer){
       check(commandData, Object);
 
       this.unblock();
+
+      CommandPublishPermission.check.call(this, data.stackName);
       
       let query = {stackName: commandData.stackName, isRemoved: false, createdAt: {$gte: commandData.createdAt}};
       return CommandCollection.find(query, {sort: {createdAt: -1}}).fetch();
@@ -101,6 +104,8 @@ if(Meteor.isServer){
       check(commandData, Object);
       
       this.unblock();
+
+      CommandPublishPermission.check.call(this, data.stackName);
 
       let query = {stackName: commandData.stackName, isRemoved: true, createdAt: {$lte: commandData.createdAt}};
       return CommandCollection.find(query, {sort: {createdAt: 1}}).fetch();

@@ -7,7 +7,7 @@
 const CommandPublishPermission = {};
 
 /**
- * check permission
+ * check read permission
  * @param stackName
  * @returns {boolean}
  */

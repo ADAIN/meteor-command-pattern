@@ -7,8 +7,10 @@
 import CommandCollection from '../collections/CommandCollection';
 import './command_publication';
 import CommandPublishPermission from '../CommandPublishPermission';
+import CommandWritePermission from '../CommandWritePermission';
 
 export {
   CommandCollection,
-  CommandPublishPermission
+  CommandPublishPermission,
+  CommandWritePermission
 };
