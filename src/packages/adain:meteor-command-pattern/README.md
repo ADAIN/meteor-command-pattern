@@ -62,6 +62,7 @@ CommandFactory.add("CustomCommand", CustomCommand);
 ```javascript
 import { CommandStack } from 'meteor/adain:meteor-command-pattern';
 
+let isReady = false;
 // if this set true the commands will skip at the first time. This is useful when you using own serialize code.
 let isSkip = false;
 // if this set true global undo redo activate, false is user account base undo, redo
@@ -104,4 +105,28 @@ stack.clear();
 remove all commands in stack
 ```javascript
 stack.remove();
+```
+
+## Add publish permission (read permission)
+```javascript
+import {CommandPublishPermission} from 'meteor/adain:meteor-command-pattern';
+
+CommandPublishPermission.check = function(stackName){
+  // check permission logic
+  // if Meteor.userId() has permission return true
+  // if Meteor.userId() hasn't permission return false
+  return true;
+};
+```
+
+## Add Command write permission
+```javascript
+import {CommandWritePermission} from 'meteor/adain:meteor-command-pattern';
+
+CommandWritePermission.check = function(stackName){
+  // check permission logic
+  // if Meteor.userId() has permission return true
+  // if Meteor.userId() hasn't permission return false
+  return true;
+};
 ```
