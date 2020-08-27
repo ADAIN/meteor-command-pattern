@@ -198,6 +198,7 @@ export default class CommandStack{
     
     this.observer = null;
     this.subscription = null;
+    this.eventListeners = null;
   }
 
   /**
