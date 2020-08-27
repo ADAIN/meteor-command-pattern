@@ -130,3 +130,15 @@ CommandWritePermission.check = function(stackName){
   return true;
 };
 ```
+
+## Add/Remove Event Listener
+```javascript
+import {CommandStackEventType} from 'meteor/adain:meteor-command-pattern';
+
+// currently suppert 4 eventTypes before undo, after undo, before redo, after redo
+const eventId = statck.addEventListener(CommandStackEventType.BEFORE_UNDO, function(commandData){
+  // do somthing
+});
+
+stack.removeEventListener(eventId);
+```

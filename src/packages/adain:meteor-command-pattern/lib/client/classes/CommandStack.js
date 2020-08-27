@@ -7,6 +7,13 @@
 import CommandCollection from '../../collections/CommandCollection';
 import CommandFactory from './CommandFactory';
 
+export const CommandStackEventType = {
+  BEFORE_UNDO: "beforeUndo",
+  AFTER_UNDO: "afterUndo",
+  BEFORE_REDO: "beforeRedo",
+  AFTER_REDO: "afterRedo"
+}
+
 /**
  * @class CommandStack command stack
  */
@@ -39,6 +46,7 @@ export default class CommandStack{
     self.canUndo = new ReactiveVar(false);
     self.canRedo = new ReactiveVar(false);
     self.isLoading = false;
+    self.eventListeners = {};
     
     self.commandCursor = CommandCollection.find({stackName}, {sort: {createdAt: 1}});
     if(!usePage){
@@ -113,6 +121,38 @@ export default class CommandStack{
       if(callback) {
         callback(self);
       }
+    }
+  }
+
+  /**
+   * add event listener for stack event
+   * @param eventType [beforeUndo, afterUndo, beforeRedo, afterUndo]
+   * @param callback
+   */
+  addEventListener(eventType, callback){
+    if(!this.eventListeners[eventType]){
+      this.eventListeners[eventType] = [];
+    }
+
+    this.eventListeners[eventType].push(callback);
+
+    return eventType + "_" + this.eventListeners[eventType].length - 1;
+  }
+
+  /**
+   * remove event listener
+   * @param id
+   */
+  removeEventListener(id){
+    const idData = id.split('_');
+    if(idData.length === 2){
+      this.eventListeners[idData[0]].splice(parseInt(idData[1], 10), 1);
+
+      if(this.eventListeners[idData[0]].length === 0){
+        delete this.eventListeners[idData[0]];
+      }
+    }else{
+      throw new Meteor.Error("CommandStack.removeEventListener [id] string is not correct." + id);
     }
   }
   
@@ -271,8 +311,27 @@ export default class CommandStack{
    * @returns {Command}
    */
   undo(){
-    let commandData = this.getUndoData();
-    return this.undoCommand(commandData);
+    const commandData = this.getUndoData();
+    if(
+      this.eventListeners[CommandStackEventType.BEFORE_UNDO] &&
+      this.eventListeners[CommandStackEventType.BEFORE_UNDO].length > 0
+    ){
+      const length = this.eventListeners[CommandStackEventType.BEFORE_UNDO].length;
+      for (let i = 0; i < length; i++) {
+        this.eventListeners[CommandStackEventType.BEFORE_UNDO][i](commandData);
+      }
+    }
+    const result = this.undoCommand(commandData);
+    if(
+      this.eventListeners[CommandStackEventType.AFTER_UNDO] &&
+      this.eventListeners[CommandStackEventType.AFTER_UNDO].length > 0
+    ){
+      const length = this.eventListeners[CommandStackEventType.AFTER_UNDO].length;
+      for (let i = 0; i < length; i++) {
+        this.eventListeners[CommandStackEventType.AFTER_UNDO][i](commandData);
+      }
+    }
+    return result;
   }
 
   /**
@@ -313,8 +372,27 @@ export default class CommandStack{
    * @returns {Command}
    */
   redo(){
-    let commandData = this.getRedoData();
-    return this.redoCommand(commandData);
+    const commandData = this.getRedoData();
+    if(
+      this.eventListeners[CommandStackEventType.BEFORE_REDO] &&
+      this.eventListeners[CommandStackEventType.BEFORE_REDO].length > 0
+    ){
+      const length = this.eventListeners[CommandStackEventType.BEFORE_REDO].length;
+      for (let i = 0; i < length; i++) {
+        this.eventListeners[CommandStackEventType.BEFORE_REDO][i](commandData);
+      }
+    }
+    const result = this.redoCommand(commandData);
+    if(
+      this.eventListeners[CommandStackEventType.AFTER_REDO] &&
+      this.eventListeners[CommandStackEventType.AFTER_REDO].length > 0
+    ){
+      const length = this.eventListeners[CommandStackEventType.AFTER_REDO].length;
+      for (let i = 0; i < length; i++) {
+        this.eventListeners[CommandStackEventType.AFTER_REDO][i](commandData);
+      }
+    }
+    return result;
   }
 
   /**
@@ -344,10 +422,14 @@ export default class CommandStack{
    * @param callback
    */
   undoToCommand(targetCommands, callback){
-    Meteor.call('CommandCollection.methods.updateCommands', {stackName: this.stackName, targetCommands, isRemoved: true}, (err, res)=>{
-      this.checkUndoRedo();
-      if(callback){
-        callback();
+    Meteor.call('CommandCollection.methods.updateCommands', {stackName: this.stackName, targetCommands, isRemoved: true}, (err)=>{
+      if(!err){
+        this.checkUndoRedo();
+        if(callback){
+          callback();
+        }
+      }else{
+        throw err;
       }
     });
   }
@@ -358,10 +440,14 @@ export default class CommandStack{
    * @param callback
    */
   redoToCommand(targetCommands, callback){
-    Meteor.call('CommandCollection.methods.updateCommands', {stackName: this.stackName, targetCommands, isRemoved: false}, (err, res)=>{
-      this.checkUndoRedo();
-      if(callback){
-        callback();
+    Meteor.call('CommandCollection.methods.updateCommands', {stackName: this.stackName, targetCommands, isRemoved: false}, (err)=>{
+      if(!err){
+        this.checkUndoRedo();
+        if(callback){
+          callback();
+        }
+      }else{
+        throw err;
       }
     });
   }

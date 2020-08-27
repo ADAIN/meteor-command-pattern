@@ -7,7 +7,7 @@
 import CommandCollection from '../collections/CommandCollection';
 import Command from './classes/Command';
 import CommandFactory from './classes/CommandFactory';
-import CommandStack from './classes/CommandStack';
+import CommandStack, {CommandStackEventType} from './classes/CommandStack';
 import CommandPublishPermission from '../CommandPublishPermission';
 import CommandWritePermission from '../CommandWritePermission';
 
@@ -16,6 +16,7 @@ export {
   Command,
   CommandFactory,
   CommandStack,
+  CommandStackEventType,
   CommandPublishPermission,
   CommandWritePermission
 };
