@@ -47,7 +47,7 @@ export default class CommandStack{
     self.canRedo = new ReactiveVar(false);
     self.isLoading = false;
     self.eventListeners = {};
-    
+
     self.commandCursor = CommandCollection.find({stackName}, {sort: {createdAt: 1}});
     if(!usePage){
       self.isLoading = true;
@@ -61,7 +61,7 @@ export default class CommandStack{
               self.loadedCount++;
               return;
             }
-            
+
             if(!doc.isRemoved){
               self.execCommand(doc, self.const.EXEC);
             }
@@ -87,7 +87,7 @@ export default class CommandStack{
     }else{
       self.currentDateTime = (new Date()).getTime();
       self.startDateTime = self.currentDateTime;
-      
+
       self.observer = self.commandCursor.observe({
         added: function(doc){
           if(doc.createdAt.getTime() < self.startDateTime){
@@ -155,7 +155,7 @@ export default class CommandStack{
       throw new Meteor.Error("CommandStack.removeEventListener [id] string is not correct." + id);
     }
   }
-  
+
   /**
    * check user can undo or redo
    */
@@ -163,7 +163,7 @@ export default class CommandStack{
     this.checkUndo();
     this.checkRedo();
   }
-  
+
   checkUndo(){
     if(this.isGlobal){
       this.canUndo.set(CommandCollection.find({stackName: this.stackName, isRemoved: false}).count() > 0);
@@ -171,7 +171,7 @@ export default class CommandStack{
       this.canUndo.set(CommandCollection.find({stackName: this.stackName, _userId: Meteor.userId(), isRemoved: false}).count() > 0);
     }
   }
-  
+
   checkRedo(){
     if(this.isGlobal){
       this.canRedo.set(CommandCollection.find({stackName: this.stackName, isRemoved: true}).count() > 0);
@@ -191,11 +191,11 @@ export default class CommandStack{
     if(this.subscription && this.subscription.length > 0){
       _.each(this.subscription, (subs)=>{
         if(subs){
-          subs.stop();  
+          subs.stop();
         }
       });
     }
-    
+
     this.observer = null;
     this.subscription = null;
     this.eventListeners = null;
@@ -207,7 +207,7 @@ export default class CommandStack{
   remove() {
     Meteor.call('CommandCollection.methods.remove', {stackName: this.stackName}, function(err){
       if(err){
-        console.error(err);
+        throw err;
       }
     });
   }
@@ -229,7 +229,7 @@ export default class CommandStack{
       }
 
       if(!command){
-        console.error(`
+        throw new Meteor.Error(`
         ${commandData.type} is not found.
         Add your command to CommandFactory using CommandFactory.add("' + commandData.type + '", ' + commandData + ');
         `);
@@ -256,10 +256,9 @@ export default class CommandStack{
           command.redo();
         }, 0);
         break;
-      
+
       default:
-        console.error(`Undefined Command Type : ${type}`);
-        break;
+        throw new Meteor.Error(`Undefined Command Type : ${type}`);
     }
   }
 
@@ -279,7 +278,7 @@ export default class CommandStack{
     if(this.isGlobal){
       Meteor.call('CommandCollection.methods.remove', query, function(err){
         if(err){
-          console.error(err);
+          throw err;
         }
       });
     }else{
@@ -345,7 +344,7 @@ export default class CommandStack{
       if(this.isGlobal || commandData._userId !== Meteor.userId()){
         Meteor.call('CommandCollection.methods.update', {_id: commandData._id}, {$set: {isRemoved: true}}, function(err){
           if(err){
-            console.error(err);
+            throw err;
           }
         });
       }else{
@@ -406,7 +405,7 @@ export default class CommandStack{
       if(this.isGlobal && commandData._userId !== Meteor.userId()){
         Meteor.call('CommandCollection.methods.update', {_id: commandData._id}, {$set: {isRemoved: false}}, function(err){
           if(err){
-            console.error(err);
+            throw err;
           }
         });
       }else{
@@ -416,7 +415,7 @@ export default class CommandStack{
 
     return commandData;
   }
-  
+
   /**
    * undo to command point
    * @param targetCommands
@@ -434,7 +433,7 @@ export default class CommandStack{
       }
     });
   }
-  
+
   /**
    * redo to command point
    * @param targetCommands
